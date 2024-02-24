@@ -21,18 +21,24 @@ class SitefController(http.Controller):
             if response.status_code == 200 and "data" in response_json and "token" in response_json["data"]:
                 token = response_json["data"]["token"]
                 return token
-            else:
+            elif response_json["code"] == 301 and response_json["status"] == "Blocked User":
+                return {"title_error": "Usuario Bloqueado",
+                        "error": "Supero el limite de intentos fallidos, por favor contacte al administrador."}
+            elif response_json["code"] == 206 and response_json["status"] == "":
                 return {"title_error": "Configuración del Módulo incorrecta",
                         "error": "Campo username o password incorrecto."}
+            else:
+                return {"title_error": "Error desconocido",
+                        "error": "Error desconocido."}
         else:
             return {"title_error": "Configuración del Módulo incompleta",
                     "error": "Campo username, password o url vacío."}
     
     @http.route('/sitef_pos_integration/cambio_sitef', type='json', methods=['POST'])
-    def cambio_sitef(self, url, username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount):
+    def cambio_sitef(self, url, username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, invoicenumber, amount):
         _logger.warning("INSIDE VUELTO SITEF")
         headers = {
-            "Authorization": f"Bearer {token}"
+            "Authorization": f"Bearer {token}"  
         }
         token_md5 = hashlib.md5(token.encode()).hexdigest()
         response = requests.post(url + "/sitefAuth/setVueltoSitef", json={
@@ -44,7 +50,7 @@ class SitefController(http.Controller):
             "destinationmobilenumber": destinationmobilenumber, 
             "destinationbank": destinationbank,
             "issuingbank": issuingbank, 
-            "invoicenumber": "12345",
+            "invoicenumber": invoicenumber,
             "amount": amount
         }, headers=headers)
         
@@ -67,10 +73,16 @@ class SitefController(http.Controller):
                 error_list = response_json["data"]["error_list"]
                 if isinstance(error_list, list) and len(error_list) > 0:
                     if (error_list[0]["error_code"] == "500"):
-                        return {
-                            "error_code": "Cédula o teléfono inválido",
-                            "description": error_list[0]["description"]
-                        }
+                        if (error_list[0]["description"] == "Su cuenta no dispone de fondos suficientes para realizar esta operación."):
+                            return{
+                                "error_code": "Fondos insuficientes",
+                                "description": error_list[0]["description"]
+                            }
+                        else:
+                            return{
+                                "error_code": "Cédula o teléfono inválido",
+                                "description": error_list[0]["description"]
+                            }
                     elif (error_list[0]["error_code"] == "9999"):
                         if (error_list[0]["description"] == "\n Banco Emisor no Afiliado"):
                             return {
@@ -92,7 +104,7 @@ class SitefController(http.Controller):
             return {"error": f"Error en la solicitud: {response.status_code}"}
     
     @http.route('/sitef_pos_integration/validarPago_sitef', type='json', methods=['POST'])
-    def validarPago_sitef(self, url, username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate):
+    def validarPago_sitef(self, url, username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate, invoicenumber):
         _logger.warning("INSIDE VALIDAR PAGO SITEF")
         headers = {
             "Authorization": f"Bearer {token}"
@@ -107,7 +119,7 @@ class SitefController(http.Controller):
             "paymentreference": paymentreference,
             "debitphone": debitphone,
             "origenbank": origenbank,
-            "invoicenumber": "9491",
+            "invoicenumber": invoicenumber,
             "receivingbank": receivingbank,
             "trxdate": trxdate
         }, headers=headers)
@@ -117,7 +129,10 @@ class SitefController(http.Controller):
             _logger.warning(response_json)
             
             if "data" in response_json and "marcada" in response_json["data"]:
-                return response_json["data"]["marcada"]
+                return {
+                    "marcada": response_json["data"]["marcada"],
+                    "payment_reference": response_json["data"]["transaction_list"][0]['payment_reference']
+                }
             elif "code" in response_json and response_json["code"] == 204 and "messages" in response_json:
                 return {
                     "title_error": "Configuración del Módulo incorrecta",
@@ -252,6 +267,48 @@ class SitefController(http.Controller):
             
             if "data" in response_json and "marcada" in response_json["data"]:
                 return response_json["data"]["marcada"]
+            else:
+                _logger.error("Error en la solicitud.")
+                error_list = response_json["data"]["error_list"]
+                if isinstance(error_list, list) and len(error_list) > 0:
+                    return {
+                        "error_code": "Datos no encontrados",
+                        "description": error_list[0]["description"]
+                    }
+                else:
+                    return {
+                        "error_code": "unknown",
+                        "description": "Unknown error"
+                    }
+        else:
+            _logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
+            return {"error": f"Error en la solicitud: {response.status_code}"}
+
+    @http.route('/sitef_pos_integration/reporteCaja_sitef', type='json', methods=['POST'])
+    def reporteCaja_sitef(self, url, username, token, idbranch, codestall, trxdateini, trxdateend, typereport, adquiriente):
+        _logger.warning("INSIDE REPORTE POR CAJA SITEF")
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+        token_md5 = hashlib.md5(token.encode()).hexdigest()
+        response = requests.post(url + "/sitefAuth/getHistoryByStallSitef", json={
+            "username": username,
+            "token": token_md5, 
+            "code": codestall,
+            "idBranch": idbranch,
+            "trxdateini": trxdateini,
+            "trxdateend": trxdateend, 
+            "typeReport": typereport, 
+            "adquiriente": adquiriente
+        }, headers=headers)
+        
+        if response.status_code == 200:
+            response_json = response.json()
+            _logger.warning(response_json)
+            
+            if response_json["code"] == 200 and response_json["status"] == "OK":
+                _logger.warning("Consulta exitosa")
+                return response_json["data"]
             else:
                 _logger.error("Error en la solicitud.")
                 error_list = response_json["data"]["error_list"]

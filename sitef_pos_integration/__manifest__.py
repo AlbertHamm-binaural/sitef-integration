@@ -13,7 +13,11 @@
     "images": ["static/description/icon.png"],
     "application": True,
     "data": [
+        "security/ir.model.access.csv",
         "views/res_config_settings.xml",
+        "views/report_sitef.xml",
+        "wizard/pos_report_sitef.xml",
+        "report/cash_report.xml",
     ],
     
     "assets": {

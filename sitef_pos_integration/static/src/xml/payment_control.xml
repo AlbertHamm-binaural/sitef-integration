@@ -6,15 +6,15 @@
                 <i class="fa fa-money"/> 
                 Cambio
             </div>
-            <div t-if="env.pos.config.activated_pm_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPagoMovil(selectedPaymentLine.amount) }" t-on-click="validarPagoMovil">
+            <div t-if="env.pos.config.activated_pm_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPago(selectedPaymentLine.amount) }" t-on-click="validarPagoMovil">
                 <i class="fa fa-mobile"/>
                 Pago Móvil
             </div>
-            <div t-if="env.pos.config.activated_trf_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPagoMovil(selectedPaymentLine.amount) }" t-on-click="validarTransferencia">
+            <div t-if="env.pos.config.activated_trf_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPago(selectedPaymentLine.amount) }" t-on-click="validarTransferencia">
                 <i class="fa fa-exchange"/>
                 Transferencia
             </div>
-            <div t-if="env.pos.config.activated_zelle_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPagoMovil(selectedPaymentLine.amount) }" t-on-click="validarZelle">
+            <div t-if="env.pos.config.activated_zelle_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPago(selectedPaymentLine.amount) }" t-on-click="validarZelle">
                 <i class="fa fa-university"/>
                 Zelle
             </div>
