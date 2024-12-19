@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="ControlSitef" t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('payment-controls')]" position="inside">
+            <div class="button js_invoice" t-on-click="cambioSitef">
+                <i class="fa fa-money"/> 
+                Cambio
+            </div>
+        </xpath>
+    </t>
+</templates>
