@@ -9,12 +9,13 @@
         "base",
         "point_of_sale",
     ],
-    "data": [
-
-    ],
     
     "images": ["static/description/icon.png"],
     "application": True,
+    "data": [
+        # "static/src/xml/CambioForm.xml",
+    ],
+    
     "assets": {
         "point_of_sale.assets": [
             "sitef_pos_integration/static/src/js/*.js",

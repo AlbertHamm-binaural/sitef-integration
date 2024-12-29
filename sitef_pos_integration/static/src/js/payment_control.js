@@ -1,19 +1,41 @@
-/** @odoo-module */
-import PaymentScreen from "point_of_sale.PaymentScreen";
-import Registries from "point_of_sale.Registries";
+odoo.define('sitef_pos_integration.payment_control', function (require) {
 
-var Session = require("web.Session");
+    const Registries = require('point_of_sale.Registries');
+    const PaymentScreen = require("point_of_sale.PaymentScreen");
 
-const ControlSitef = (PaymentScreen) =>
-    
-class ControlSitef extends PaymentScreen {
-    async cambioSitef() {
-        console.log("hola"),
-        this.showPopup('ConfirmPopup', {
-        title: this.env._t("Cambio"),
-        body: this.env._t("Hola Miguel."),
-        });
-    }
-};
+    var Session = require("web.Session");
+        
+    const ControlSitef = PaymentScreen => class extends PaymentScreen {
+        constructor() {
+            super(...arguments);
 
-Registries.Component.extend(PaymentScreen, ControlSitef);
+        }
+
+        async cambio() {
+            if (this.selectedPaymentLine && this.selectedPaymentLine.amount < 0) {
+                this.showPopup('CambioForm', {amount: Math.abs(this.selectedPaymentLine.amount)});
+            }
+            else {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Error'),
+                    body: this.env._t('No se puede realizar un cambio.'),
+                });
+            }
+        }
+        async validarPagoMovil() {
+            if (this.selectedPaymentLine && this.selectedPaymentLine.amount > 0) {
+                this.showPopup('ValidarPagoMovilForm', {amount: parseFloat(Math.abs(this.selectedPaymentLine.amount).toFixed(2))});
+                
+            }
+            else {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Error'),
+                    body: this.env._t('No se puede realizar un pago móvil.'),
+                });
+            }
+        }
+    };
+
+    Registries.Component.extend(PaymentScreen, ControlSitef);
+    return ControlSitef;
+});

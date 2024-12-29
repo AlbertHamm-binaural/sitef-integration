@@ -1,0 +1,58 @@
+<templates id="template" name="ValidarPagoMovilForm">
+    <t t-name="ValidarPagoMovilForm" owl="1">
+        <div class="popup">
+            <header class="title drag-handle">
+                <p>Validar Pago Móvil</p>
+            </header>
+            <main class="body">
+                <div class="form-group-horizontal">
+                    <div class="form-group">
+                        <label class="subtitle">Referencia</label>
+                        <input type="text" class="input" t-ref="referenciaInput" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="subtitle">Teléfono</label>
+                        <input type="text" class="input" t-ref="telefonoInput" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="subtitle">Banco</label>
+                    <select class="input" t-ref="bancoSelect">
+                        <option value="">Seleccionar un banco...</option>
+                        <option value="0102">(0102) Banco de Venezuela</option>
+                        <option value="0104">(0104) Banco Venezolano de Crédito</option>
+                        <option value="0105">(0105) Banco Mercantil</option>
+                        <option value="0108">(0108) Banco Provincial</option>
+                        <option value="0114">(0114) Bancaribe</option>
+                        <option value="0115">(0115) Banco Exterior</option>
+                        <option value="0116">(0116) Banco Occidental de Descuento (BOD)</option>
+                        <option value="0128">(0128) Banco Caroní</option>
+                        <option value="0134">(0134) Bancrecer</option>
+                        <option value="0151">(0151) Banco Nacional de Crédito (BNC)</option>
+                        <option value="0156">(0156) 100% Banco</option>
+                        <option value="0157">(0157) DelSur Banco Universal</option>
+                        <option value="0163">(0163) Banco del Tesoro</option>
+                        <option value="0166">(0166) Banco Agrícola de Venezuela</option>
+                        <option value="0172">(0172) Bancamiga Banco Universal</option>
+                        <option value="0173">(0173) Banco Activo</option>
+                        <option value="0174">(0174) Banplus</option>
+                        <option value="0175">(0175) Banco Bicentenario</option>
+                        <option value="0177">(0177) Banco de la Fuerza Armada Nacional Bolivariana (BANFANB)</option>
+                    </select>
+                </div>
+                <div class="form-group-center">
+                    <label class="subtitle">Monto</label>
+                    <t t-esc="props.amount" class="input"/>
+                </div>
+            </main>
+            <footer class="footer">
+                <div class="button confirm" t-on-click="btAceptar">
+                    Aceptar
+                </div>
+                <div class="button cancel" t-on-click="cancel">
+                    <t t-esc="props.cancelText" />
+                </div>
+            </footer>
+        </div>
+    </t>
+</templates>

@@ -2,9 +2,13 @@
 <templates id="template" xml:space="preserve">
     <t t-name="ControlSitef" t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('payment-controls')]" position="inside">
-            <div class="button js_invoice" t-on-click="cambioSitef">
+            <div class="button js_invoice" t-on-click="cambio">
                 <i class="fa fa-money"/> 
                 Cambio
+            </div>
+            <div class="button js_invoice" t-on-click="validarPagoMovil">
+                <i class="fa fa-mobile"/>
+                Pago Móvil
             </div>
         </xpath>
     </t>
