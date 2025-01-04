@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_config_settings_inherit_sitef" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sitef</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@data-key='point_of_sale']" position="inside">
+                <h2>Sitef</h2>
+                <div class="row mt16 o_settings_container">
+                    <div class="col12 col-lg-6">
+                        <div class="form-group">
+                            <label for="username" class="col-form-label">Username</label>
+                            <div class="col-sm-8">
+                                <field name="username"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="col-form-label">Password</label>
+                            <div class="col-sm-8">
+                                <field name="password"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col12 col-lg-6">
+                        <div class="form-group">
+                            <label for="idbranch" class="col-form-label">Branch ID</label>
+                            <div class="col-sm-8">
+                                <field name="idbranch"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="codestall" class="col-form-label">Code Stall</label>
+                            <div class="col-sm-8">
+                                <field name="codestall"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="issuingbank" class="col-form-label">Banco Emisor</label>
+                            <div class="col-sm-8">
+                                <field name="issuingbank" widget="selection"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

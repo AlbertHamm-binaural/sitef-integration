@@ -13,7 +13,7 @@
     "images": ["static/description/icon.png"],
     "application": True,
     "data": [
-        # "static/src/xml/CambioForm.xml",
+        "views/res_config_settings.xml",
     ],
     
     "assets": {

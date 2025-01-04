@@ -14,20 +14,38 @@ class CambioForm extends AbstractAwaitablePopup {
         this.banco = useRef('bancoSelect');
     }
 
-    btAceptar() {
-        let tipDoc = this.tipDoc.el.value;
-        let doc = this.doc.el.value;
-        let telefono = this.telefono.el.value;
-        let banco = this.banco.el.value;
-        let monto = this.props.amount;
+    async btAceptar() {
+        // let tipDoc = this.tipDoc.el.value;
+        // let doc = this.doc.el.value;
+        // let telefono = this.telefono.el.value;
+        // let banco = this.banco.el.value;
+        // let monto = this.props.amount;
+        // doc = tipDoc + doc;
+        // telefono = '58' + telefono.substring(1);
 
-        doc = tipDoc + doc;
-        telefono = '58' + telefono.substring(1);
+        this.generarToken();
+    }
 
-        console.log('Documento:', doc);
-        console.log('Telefono:', telefono);
-        console.log('Banco:', banco);
-        console.log('Monto:', monto);
+    generarToken() {
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        
+        var raw = JSON.stringify({
+            "username": this.env.pos.config.username,
+            "password": this.env.pos.config.encrypter_password
+        });
+        
+        var requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
+        
+        fetch("https://api.sitefdevenezuela.com/prod/s4/sitef/apiToken", requestOptions)
+            .then(response => response.text())
+            .then(result => console.log(result))
+            .catch(error => console.log('error', error));    
     }
 }
 
