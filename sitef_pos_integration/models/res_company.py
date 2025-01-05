@@ -5,26 +5,32 @@ class ResCompany(models.Model):
     
     username = fields.Char()
     password = fields.Char()
-    idbranch = fields.Char()
+    idbranch = fields.Integer()
     codestall = fields.Char()
     issuingbank = fields.Selection([
-        ("102", "(0102) Banco de Venezuela"),
-        ("104", "(0104) Banco Venezolano de Crédito"),
-        ("105", "(0105) Banco Mercantil"),
-        ("108", "(0108) Banco Provincial"),
-        ("114", "(0114) Bancaribe"),
-        ("115", "(0115) Banco Exterior"),
-        ("116", "(0116) Banco Occidental de Descuento (BOD)"),
-        ("128", "(0128) Banco Caroní"),
-        ("134", "(0134) Bancrecer"),
-        ("151", "(0151) Banco Nacional de Crédito (BNC)"),
-        ("156", "(0156) 100% Banco"),
-        ("157", "(0157) DelSur Banco Universal"),
-        ("163", "(0163) Banco del Tesoro"),
-        ("166", "(0166) Banco Agrícola de Venezuela"),
-        ("172", "(0172) Bancamiga Banco Universal"),
-        ("173", "(0173) Banco Activo"),
-        ("174", "(0174) Banplus"),
-        ("175", "(0175) Banco Bicentenario"),
-        ("177", "(0177) Banco de la Fuerza Armada Nacional Bolivariana (BANFANB)")
+        ("102", "(0102) Banco de Venezuela, S.A. Banco Universal"),
+        ("104", "(0104) Banco Venezolano de Crédito, S.A. Banco Universal"),
+        ("105", "(0105) Banco Mercantil C.A., Banco Universal"),
+        ("108", "(0108) Banco Provincial, S.A. Banco Universal"),
+        ("114", "(0114) Banco del Caribe C.A., Banco Universal"),
+        ("115", "(0115) Banco Exterior C.A., Banco Universal"),
+        ("128", "(0128) Banco Caroní C.A., Banco Universal"),
+        ("134", "(0134) Banesco Banco Universal, C.A."),
+        ("137", "(0137) Banco Sofitasa Banco Universal, C.A."),
+        ("138", "(0138) Banco Plaza, Banco Universal"),
+        ("146", "(0146) Banco de la Gente Emprendedora C.A."),
+        ("151", "(0151) Banco Fondo Común, C.A Banco Universal"),
+        ("156", "(0156) 100% Banco, Banco Comercial, C.A"),
+        ("157", "(0157) DelSur, Banco Universal C.A."),
+        ("163", "(0163) Banco del Tesoro C.A., Banco Universal"),
+        ("166", "(0166) Banco Agrícola de Venezuela C.A., Banco Universal"),
+        ("168", "(0168) Bancrecer S.A., Banco Microfinanciero"),
+        ("169", "(0169) Mi Banco, Banco Microfinanciero, C.A."),
+        ("171", "(0171) Banco Activo C.A., Banco Universal"),
+        ("172", "(0172) Bancamiga Banco Universal, C.A."),
+        ("173", "(0173) Banco Internacional de Desarrollo, C.A., Banco Universal"),
+        ("174", "(0174) Banplus Banco Universal, C.A."),
+        ("175", "(0175) Banco Bicentenario del Pueblo, Banco Universal C.A."),
+        ("177", "(0177) Banco de la Fuerza Armada Nacional Bolivariana (BANFANB)"),
+        ("191", "(0191) Banco Nacional de Crédito (BNC)")
     ])
