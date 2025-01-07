@@ -16,40 +16,53 @@ class CambioForm extends AbstractAwaitablePopup {
         this.banco = useRef('bancoSelect');
     }
     
-    async btAceptar() {
-        let username = this.env.pos.config.username;
-        let password = this.env.pos.config.encrypted_password;
-        let idbranch = this.env.pos.config.idbranch;        
-        let codestall = this.env.pos.config.codestall;
-        let issuingbank = parseInt(this.env.pos.config.issuingbank, 10);
-
-        let tipDoc = this.tipDoc.el.value;
-        let doc = this.doc.el.value;
-        let telefono = this.telefono.el.value;
-
-        let destinationbank = parseInt(this.banco.el.value, 10);
-        let amount = this.props.amount;
-        let destinationid = tipDoc + doc;
-        let destinationmobilenumber = '58' + telefono.substring(1);
-
-        const token = await this.generarToken(username, password);
-        const cambio = await this.generarCambio(username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount);
+    async confirm() {
+        if (this.doc.el.value != "" && this.telefono.el.value != "" && this.banco.el.value != "") {
+            let username = this.env.pos.config.username;
+            let password = this.env.pos.config.encrypted_password;
+            let idbranch = this.env.pos.config.idbranch;        
+            let codestall = this.env.pos.config.codestall;
+            let issuingbank = parseInt(this.env.pos.config.issuingbank, 10);
+    
+            let tipDoc = this.tipDoc.el.value;
+            let doc = this.doc.el.value;
+            let telefono = this.telefono.el.value;
+    
+            let destinationbank = parseInt(this.banco.el.value, 10);
+            let amount = this.props.amount;
+            let destinationid = tipDoc + doc;
+            let destinationmobilenumber = '58' + telefono.substring(1);
+            
+            const token = await this.generarToken(username, password);
+            if (token) {
+                const cambio = await this.generarCambio(username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount);
+            }
+        } else {
+            this.showPopup('ErrorPopup', {
+                title: this.env._t('Campos vacíos'),
+                body: this.env._t('Debe ingresar la documentación, teléfono y banco del cliente')
+            });
+        }
     }
 
     async generarToken(username, password) {
-        try {
-            const result = await ajax.jsonRpc(
-                "/sitef_pos_integration/get_token", "call",
-                { username, password }
-            );
+        const result = await ajax.jsonRpc(
+            "/sitef_pos_integration/get_token", "call",
+            { username, password }
+        );
+        if (result.error) {
+            this.showPopup('ErrorPopup', {
+                title: this.env._t('Error al generar token'),
+                body: this.env._t(result.error),
+            });
+            return null
+        } else{
             return result;
-        } catch (error) {
-            console.error('Error:', error);
-            return null;
         }
     }
+    
     async generarCambio(username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount) {
-        try {
+        try {    
             const result = await ajax.jsonRpc(
                 "/sitef_pos_integration/cambio_sitef", "call",
                 { username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount}
@@ -59,6 +72,10 @@ class CambioForm extends AbstractAwaitablePopup {
                     title: this.env._t('Pago Móvil realizado con éxito'),
                     body: this.env._t('Referencia: ') + result.payment_reference
                 });
+                this.env.posbus.trigger('close-popup', {
+                    popupId: this.props.id,
+                    response: { confirmed: true, payload: await this.getPayload() },
+                });    
                 return result;
             } else {
                 this.showPopup('ErrorPopup', {
@@ -79,6 +96,7 @@ class CambioForm extends AbstractAwaitablePopup {
 
 CambioForm.defaultProps = {
     cancelText: _lt('Cancel'),
+    confirmText: _lt('Confirm'),
 };
 
 CambioForm.template = 'CambioForm';

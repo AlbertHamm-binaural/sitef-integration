@@ -15,36 +15,49 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
         this.banco = useRef('bancoSelect');
     }
 
-    async btAceptar() {
-        let username = this.env.pos.config.username;
-        let password = this.env.pos.config.encrypted_password;
-        let idbranch = this.env.pos.config.idbranch;        
-        let codestall = this.env.pos.config.codestall;
-        let receivingbank = parseInt(this.env.pos.config.issuingbank, 10);
+    async confirm() {
+        if (this.referencia.el.value != "" && this.telefono.el.value != "") {
+            let username = this.env.pos.config.username;
+            let password = this.env.pos.config.encrypted_password;
 
-        let paymentreference = this.referencia.el.value;
-        let telefono = this.telefono.el.value;
-        let origenbank = parseInt(this.banco.el.value, 10);
-        let amount = this.props.amount;
-        let debitphone = '58' + telefono.substring(1);
-        let trxdate = new Date().toISOString().slice(0, 10);
-
-        const token = await this.generarToken(username, password);
-        const pago = await this.validarPago(username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate);
+            let idbranch = this.env.pos.config.idbranch;        
+            let codestall = this.env.pos.config.codestall;
+            let receivingbank = parseInt(this.env.pos.config.issuingbank, 10);
+    
+            let paymentreference = this.referencia.el.value;
+            let telefono = this.telefono.el.value;
+            let origenbank = parseInt(this.banco.el.value, 10);
+            let amount = this.props.amount;
+            let debitphone = '58' + telefono.substring(1);
+            let trxdate = new Date().toISOString().slice(0, 10);
+            
+            const token = await this.generarToken(username, password);
+            if (token) {
+                const pago = await this.validarPago(username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate);
+            }
+        } else {
+            this.showPopup('ErrorPopup', {
+                title: this.env._t('Campos vacíos'),
+                body: this.env._t('Debe ingresar la referencia y el teléfono del cliente')
+            });
+        }
     }
 
     async generarToken(username, password) {
-        try {
-            const result = await ajax.jsonRpc(
-                "/sitef_pos_integration/get_token", "call",
-                { username, password }
-            );
+        const result = await ajax.jsonRpc(
+            "/sitef_pos_integration/get_token", "call",
+            { username, password }
+        );
+        if (result.error) {
+            this.showPopup('ErrorPopup', {
+                title: this.env._t('Error al generar token'),
+                body: this.env._t(result.error),
+            });
+        } else{
             return result;
-        } catch (error) {
-            console.error('Error:', error);
-            return null;
         }
     }
+    
     async validarPago(username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate) {
         try {
             const result = await ajax.jsonRpc(
@@ -54,8 +67,12 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
             if (result == "marcada") {
                 this.showPopup('ConfirmPopup', {
                     title: this.env._t('Validación de pago móvil'),
-                    body: this.env._t('El pago móvil fue validado con éxito'),
+                    body: this.env._t('El pago móvil fue validado con éxito')
                 });
+                this.env.posbus.trigger('close-popup', {
+                    popupId: this.props.id,
+                    response: { confirmed: true, payload: await this.getPayload() },
+                });    
                 return result;
             } 
             if (result == "verified") {
@@ -83,6 +100,7 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
 
 ValidarPagoMovilForm.defaultProps = {
     cancelText: _lt('Cancel'),
+    confirmText: _lt('Confirm'),
 };
 
 ValidarPagoMovilForm.template = 'ValidarPagoMovilForm';

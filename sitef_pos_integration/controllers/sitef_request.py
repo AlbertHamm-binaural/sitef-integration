@@ -8,19 +8,22 @@ _logger = logging.getLogger(__name__)
 class SitefController(http.Controller):
     @http.route('/sitef_pos_integration/get_token', type='json', methods=['POST'])
     def get_token(self, username, password):
-        _logger.warning("INSIDE GET TOKEN")
-        response = requests.post("https://api.sitefdevenezuela.com/prod/s4/sitef/apiToken", json={
-            "username": username,
-            "password": password
-        })
-        response_json = response.json()
-        _logger.warning(response_json)
-        
-        if response.status_code == 200 and "data" in response_json and "token" in response_json["data"]:
-            token = response_json["data"]["token"]
-            return token
+        if username != "" and password != "":
+            _logger.warning("INSIDE GET TOKEN")
+            response = requests.post("https://api.sitefdevenezuela.com/prod/s4/sitef/apiToken", json={
+                "username": username,
+                "password": password
+            })
+            response_json = response.json()
+            _logger.warning(response_json)
+            
+            if response.status_code == 200 and "data" in response_json and "token" in response_json["data"]:
+                token = response_json["data"]["token"]
+                return token
+            else:
+                return {"error": "Campo username o password incorrecto."}
         else:
-            return {"error": "Invalid response from API"}
+            return {"error": "Campo username o password vacío."}
     
     @http.route('/sitef_pos_integration/cambio_sitef', type='json', methods=['POST'])
     def cambio_sitef(self, username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount):
