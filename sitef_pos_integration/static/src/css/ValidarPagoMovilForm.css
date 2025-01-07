@@ -1,0 +1,36 @@
+.form-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    width: 100%;
+}
+
+.monto-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.monto {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 5px;
+} 
+.pos .popup input, .pos .popup-input {
+    width: 100%;
+}
+
+select {
+    font-family: system-ui;
+}

@@ -5,7 +5,7 @@
                 <p>Validar Pago Móvil</p>
             </header>
             <main class="body">
-                <div class="form-group-horizontal">
+                <div class="form-group-horizontal" style="display: flex; justify-content: space-between;">
                     <div class="form-group">
                         <label class="subtitle">Referencia</label>
                         <input type="text" class="input" t-ref="referenciaInput" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
@@ -46,9 +46,15 @@
                         <option value="191">(0191) Banco Nacional de Crédito (BNC)</option>
                     </select>
                 </div>
-                <div class="form-group-center">
+                
+                <div class="form-date">
+                    <label class="subtitle">Fecha</label>
+                    <input type="date" t-ref="fecha" class="input">
+                </div>
+
+                <div class="form-group monto-container">
                     <label class="subtitle">Monto</label>
-                    <t t-esc="props.amount" class="input"/> Bs.F
+                    <t t-esc="props.amount" class="input monto"/> Bs.F
                 </div>
             </main>
             <footer class="footer">

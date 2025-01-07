@@ -13,6 +13,7 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
         this.referencia = useRef('referenciaInput');
         this.telefono = useRef('telefonoInput');
         this.banco = useRef('bancoSelect');
+        this.fecha = useRef('fecha');
     }
 
     async confirm() {
@@ -29,8 +30,8 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
             let origenbank = parseInt(this.banco.el.value, 10);
             let amount = this.props.amount;
             let debitphone = '58' + telefono.substring(1);
-            let trxdate = new Date().toISOString().slice(0, 10);
-            
+            let trxdate = this.fecha.el.value;
+
             const token = await this.generarToken(username, password);
             if (token) {
                 const pago = await this.validarPago(username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate);
