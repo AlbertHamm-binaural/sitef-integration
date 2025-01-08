@@ -34,6 +34,22 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
                 });
             }
         }
+
+        AmountCambio(amount) {        
+            if (amount < 0 && amount != 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        AmountPagoMovil(amount) {
+            if (amount > 0 && amount != 0) {
+                return false;
+            } else{
+                return true;
+            }
+        }
     };
 
     Registries.Component.extend(PaymentScreen, ControlSitef);
