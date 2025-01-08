@@ -17,7 +17,7 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
     }
 
     async confirm() {
-        if (this.referencia.el.value != "" && this.telefono.el.value != "") {
+        if (this.referencia.el.value != "" && this.telefono.el.value != "" && this.banco.el.value != "" && this.fecha.el.value != "") {
             let username = this.env.pos.config.username;
             let password = this.env.pos.config.encrypted_password;
 
@@ -39,7 +39,7 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
         } else {
             this.showPopup('ErrorPopup', {
                 title: this.env._t('Campos vacíos'),
-                body: this.env._t('Debe ingresar la referencia y el teléfono del cliente')
+                body: this.env._t('Debe ingresar TODOS los campos')
             });
         }
     }
