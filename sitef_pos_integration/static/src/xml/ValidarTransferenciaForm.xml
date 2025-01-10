@@ -57,7 +57,7 @@
 
                 <div class="form-date">
                     <label class="subtitle">Fecha</label>
-                    <input type="date" t-ref="fecha" class="input" t-att-value="new Date().toISOString().split('T')[0]">
+                    <input type="date" t-ref="fecha" class="input" t-att-value="(new Date(Date.now() - 4 * 60 * 60 * 1000)).toISOString().split('T')[0]"/>
                 </div>
 
                 <div class="form-group monto-container">

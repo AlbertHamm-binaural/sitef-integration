@@ -14,6 +14,10 @@
                 <i class="fa fa-exchange"/>
                 Transferencia
             </div>
+            <div t-if="!env.isMobile" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPagoMovil(selectedPaymentLine.amount) }" t-on-click="validarZelle">
+                <i class="fa fa-university"/>
+                Zelle
+            </div>
         </xpath>
     </t>
 </templates>

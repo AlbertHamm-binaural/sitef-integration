@@ -1,0 +1,28 @@
+<templates id="template" name="ValidarZelleForm">
+    <t t-name="ValidarZelleForm" owl="1">
+        <div class="popup">
+            <header class="title drag-handle">
+                <p>Zelle</p>
+            </header>
+            <main class="body">               
+                <div class="form-date">
+                    <label class="subtitle">Fecha</label>
+                    <input type="date" t-ref="fecha" class="input" t-att-value="new Date().toISOString().split('T')[0]"/>
+                </div>
+
+                <div class="form-group monto-container">
+                    <label class="subtitle">Monto</label>
+                    <t t-esc="state.amount" class="input"/>$
+                </div>
+            </main>
+            <footer class="footer">
+                <div class="button confirm" t-on-click="confirm">
+                    <t t-esc="props.confirmText" />
+                </div>
+                <div class="button cancel" t-on-click="cancel">
+                    <t t-esc="props.cancelText" />
+                </div>
+            </footer>
+        </div>
+    </t>
+</templates>

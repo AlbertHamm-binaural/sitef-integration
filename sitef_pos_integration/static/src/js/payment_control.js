@@ -44,6 +44,18 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
                     body: this.env._t('No se puede realizar una transferencia.'),
                 });
             }
+        }   
+        
+        async validarZelle() {
+            if (this.selectedPaymentLine && this.selectedPaymentLine.amount > 0) {
+                this.showPopup('ValidarZelleForm', { amount: Math.abs(this.selectedPaymentLine.amount) });
+            }
+            else {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Error'),
+                    body: this.env._t('No se puede realizar un Zelle.'),
+                });
+            }
         }    
         AmountCambio(amount) {
             if (amount < 0) {
