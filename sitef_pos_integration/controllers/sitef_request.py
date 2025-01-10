@@ -114,3 +114,47 @@ class SitefController(http.Controller):
         else:
             _logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
             return {"error": f"Error en la solicitud: {response.status_code}"}
+        
+    @http.route('/sitef_pos_integration/validarTransferencia_sitef', type='json', methods=['POST'])
+    def validarTransferencia_sitef(self, username, token, idbranch, codestall, amount, paymenreference, origenbank, origendni, trxdate, receivingbank):
+        _logger.warning("INSIDE VALIDAR TRANSFERENCIA SITEF")
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+        token_md5 = hashlib.md5(token.encode()).hexdigest()
+        response = requests.post("https://api.sitefdevenezuela.com/prod/s4/sitefAuth/getTrfSitef", json={
+            "username": username,
+            "token": token_md5,
+            "idbranch": idbranch,
+            "codestall": codestall,
+            "amount": amount,
+            "paymenreference": paymenreference,
+            "origendni": origendni,
+            "origenbank": origenbank,
+            "receivingbank": receivingbank,
+            "origenbank": origenbank,
+            "trxdate": trxdate
+        }, headers=headers)
+        
+        if response.status_code == 200:
+            response_json = response.json()
+            _logger.warning(response_json)
+            
+            if "data" in response_json and "marcada" in response_json["data"]:
+                return response_json["data"]["marcada"]
+            else:
+                _logger.error("Error en la solicitud.")
+                error_list = response_json["data"]["error_list"]
+                if isinstance(error_list, list) and len(error_list) > 0:
+                    return {
+                        "error_code": error_list[0]["error_code"],
+                        "description": error_list[0]["description"]
+                    }
+                else:
+                    return {
+                        "error_code": "unknown",
+                        "description": "Unknown error"
+                    }
+        else:
+            _logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
+            return {"error": f"Error en la solicitud: {response.status_code}"}

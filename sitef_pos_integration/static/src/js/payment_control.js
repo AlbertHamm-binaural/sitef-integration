@@ -34,17 +34,26 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
                 });
             }
         }
-
-        AmountCambio(amount) {        
-            if (amount < 0 && amount != 0) {
-                return true;
-            } else {
+        async validarTransferencia() {
+            if (this.selectedPaymentLine && this.selectedPaymentLine.amount > 0) {
+                this.showPopup('ValidarTransferenciaForm', {amount: Math.abs(this.selectedPaymentLine.amount)});
+            }
+            else {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Error'),
+                    body: this.env._t('No se puede realizar una transferencia.'),
+                });
+            }
+        }    
+        AmountCambio(amount) {
+            if (amount < 0) {
                 return false;
+            } else {
+                return true;
             }
         }
-
         AmountPagoMovil(amount) {
-            if (amount > 0 && amount != 0) {
+            if (amount > 0) {
                 return false;
             } else{
                 return true;

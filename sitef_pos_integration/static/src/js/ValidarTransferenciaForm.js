@@ -7,35 +7,36 @@ import { _lt } from 'web.core';
 
 const ajax = require('web.ajax');
 
-class CambioForm extends AbstractAwaitablePopup {
+class ValidarTransferenciaForm extends AbstractAwaitablePopup {
     setup() {
         super.setup();
         this.tipDoc = useRef('tipDocSelect');
         this.doc = useRef('docInput');
-        this.telefono = useRef('telefonoInput');
+        this.ref = useRef('refInput');
         this.banco = useRef('bancoSelect');
+        this.fecha = useRef('fecha');
     }
     
     async confirm() {
-        if (this.doc.el.value != "" && this.telefono.el.value != "" && this.banco.el.value != "") {
+        if (this.doc.el.value != "" && this.ref.el.value != "" && this.banco.el.value != "" && this.fecha.el.value != "" ) {
             let username = this.env.pos.config.username;
             let password = this.env.pos.config.encrypted_password;
             let idbranch = this.env.pos.config.idbranch;        
             let codestall = this.env.pos.config.codestall;
-            let issuingbank = parseInt(this.env.pos.config.issuingbank, 10);
+            let receivingbank = parseInt(this.env.pos.config.issuingbank, 10);
     
             let tipDoc = this.tipDoc.el.value;
             let doc = this.doc.el.value;
-            let telefono = this.telefono.el.value;
+            let paymenreference = this.ref.el.value;
+            let trxdate = this.fecha.el.value;
     
-            let destinationbank = parseInt(this.banco.el.value, 10);
+            let origenbank = parseInt(this.banco.el.value, 10);
             let amount = this.props.amount;
-            let destinationid = tipDoc + doc;
-            let destinationmobilenumber = '58' + telefono.substring(1);
+            let origendni = tipDoc + doc;
             
             const token = await this.generarToken(username, password);
             if (token) {
-                const cambio = await this.generarCambio(username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount);
+                const cambio = await this.validarTransferencia(username, token, idbranch, codestall, amount, paymenreference, origenbank, origendni, trxdate, receivingbank);
             }
         } else {
             this.showPopup('ErrorPopup', {
@@ -61,25 +62,32 @@ class CambioForm extends AbstractAwaitablePopup {
         }
     }
     
-    async generarCambio(username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount) {
+    async validarTransferencia(username, token, idbranch, codestall, amount, paymenreference, origenbank, origendni, trxdate, receivingbank) {
         try {    
             const result = await ajax.jsonRpc(
-                "/sitef_pos_integration/cambio_sitef", "call",
-                { username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount}
+                "/sitef_pos_integration/validarTransferencia_sitef", "call",
+                { username, token, idbranch, codestall, amount, paymenreference, origenbank, origendni, trxdate, receivingbank}
             );
-            if (result.trx_status == "approved") {
+            if (result == "marcada") {
                 this.showPopup('ConfirmPopup', {
-                    title: this.env._t('Pago Móvil realizado con éxito'),
-                    body: this.env._t('Referencia: ') + result.payment_reference
+                    title: this.env._t('Validación de transferencia'),
+                    body: this.env._t('La transferencia fue validada con éxito')
                 });
                 this.env.posbus.trigger('close-popup', {
                     popupId: this.props.id,
                     response: { confirmed: true, payload: await this.getPayload() },
                 });    
                 return result;
+            } 
+            if (result == "verified") {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Validación de transferencia'),
+                    body: this.env._t('La transferencia ya fue validada anteriormente'),
+                });
+                return result;
             } else {
                 this.showPopup('ErrorPopup', {
-                    title: this.env._t('Error: ') + result.error_code,
+                    title: this.env._t("Error: ") + result.error_code,
                     body: this.env._t(result.description),
                 });
                 return null;
@@ -94,12 +102,13 @@ class CambioForm extends AbstractAwaitablePopup {
     }
 }
 
-CambioForm.defaultProps = {
+
+ValidarTransferenciaForm.defaultProps = {
     cancelText: _lt('Cancel'),
     confirmText: _lt('Confirm'),
 };
 
-CambioForm.template = 'CambioForm';
+ValidarTransferenciaForm.template = 'ValidarTransferenciaForm';
 
-Registries.Component.add(CambioForm);
-export default CambioForm;
+Registries.Component.add(ValidarTransferenciaForm);
+export default ValidarTransferenciaForm;
