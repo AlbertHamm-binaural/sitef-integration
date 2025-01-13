@@ -3,6 +3,8 @@ import requests
 import logging
 import hashlib
 import json
+from bs4 import BeautifulSoup
+
 
 _logger = logging.getLogger(__name__)
 
@@ -202,13 +204,19 @@ class SitefController(http.Controller):
 
     @http.route('/sitef_pos_integration/obtener_precio_dolar', type='json', methods=['POST'])
     def obtener_precio_dolar(self):
- 
-            url_api = "https://pydolarve.org/api/v1/dollar?page=alcambio"
-            response = requests.get(url_api)
-            response.raise_for_status()  
+        url = 'https://www.bcv.org.ve'
+        respuesta = requests.get(url, verify=False)
+
+        if respuesta.status_code == 200:
+            soup = BeautifulSoup(respuesta.text, 'html.parser')
             
-            data = response.json()
-   
-            precio_bcv = data["monitors"]["bcv"]["price"]
-            return {"precio_bcv": precio_bcv}
+            dolar_divs = soup.find_all('div', class_='centrado')
+            
+            if len(dolar_divs) >= 5:
+                dolar_text = dolar_divs[4].find('strong').text.strip()
+                dolar_text = dolar_text.replace(',', '.')
+                precio_dolar = float(dolar_text.split(' ')[0])
+                return round(precio_dolar, 2)
+        else:
+            print(f"Error: {respuesta.status_code}")
        

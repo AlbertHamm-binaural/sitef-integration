@@ -113,8 +113,8 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
             const result = await ajax.jsonRpc(
                 "/sitef_pos_integration/obtener_precio_dolar", "call", {}
             );
-            if (result && result.precio_bcv) {
-                return result.precio_bcv;
+            if (result) {
+                return result;
             } else {
                 console.log("No se pudo obtener el precio del dólar.");
             }
