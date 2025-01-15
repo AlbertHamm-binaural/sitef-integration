@@ -23,11 +23,11 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
 
     async confirm() {
         if (this.fecha.el.value != "") {
-            let username = this.env.pos.config.username;
+            let username = this.env.pos.config.username_sitef;
             let password = this.env.pos.config.encrypted_password;
-            let url = this.env.pos.config.url;
-            let idbranch = this.env.pos.config.idbranch;
-            let codestall = this.env.pos.config.codestall;
+            let url = this.env.pos.config.url_sitef;
+            let idbranch = this.env.pos.config.idbranch_sitef;
+            let codestall = this.env.pos.config.codestall_sitef;
 
             let trxdate = this.fecha.el.value;
 

@@ -19,12 +19,12 @@ class ValidarTransferenciaForm extends AbstractAwaitablePopup {
     
     async confirm() {
         if (this.doc.el.value != "" && this.ref.el.value != "" && this.banco.el.value != "" && this.fecha.el.value != "" ) {
-            let username = this.env.pos.config.username;
+            let username = this.env.pos.config.username_sitef;
             let password = this.env.pos.config.encrypted_password;
-            let url = this.env.pos.config.url;
-            let idbranch = this.env.pos.config.idbranch;        
-            let codestall = this.env.pos.config.codestall;
-            let receivingbank = parseInt(this.env.pos.config.issuingbank, 10);
+            let url = this.env.pos.config.url_sitef;
+            let idbranch = this.env.pos.config.idbranch_sitef;        
+            let codestall = this.env.pos.config.codestall_sitef;
+            let receivingbank = parseInt(this.env.pos.config.issuingbank_sitef, 10);
     
             let tipDoc = this.tipDoc.el.value;
             let doc = this.doc.el.value;

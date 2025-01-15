@@ -16,11 +16,11 @@ class PosConfig(models.Model):
     url_sitef = fields.Char(related="company_id.url_sitef", string="URL", readonly=False)
     encrypted_password = fields.Char(string="Encrypted Password", compute="_encrypted_password")
     
-    @api.depends('password')
+    @api.depends('password_sitef')
     def _encrypted_password(self):
         for record in self:
-            if record.password:
-                record.encrypted_password = hashlib.md5(record.password.encode()).hexdigest()
+            if record.password_sitef:
+                record.encrypted_password = hashlib.md5(record.password_sitef.encode()).hexdigest()
             else:
                 record.encrypted_password = ''
     
