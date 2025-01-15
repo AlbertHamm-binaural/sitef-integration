@@ -3,11 +3,11 @@ from odoo import fields, models
 class ResCompany(models.Model):
     _inherit = "res.company"
     
-    username = fields.Char()
-    password = fields.Char()
-    idbranch = fields.Integer()
-    codestall = fields.Char()
-    issuingbank = fields.Selection([
+    username_sitef = fields.Char()
+    password_sitef = fields.Char()
+    idbranch_sitef = fields.Integer()
+    codestall_sitef = fields.Char()
+    issuingbank_sitef = fields.Selection([
         ("102", "(0102) Banco de Venezuela, S.A. Banco Universal"),
         ("104", "(0104) Banco Venezolano de Crédito, S.A. Banco Universal"),
         ("105", "(0105) Banco Mercantil C.A., Banco Universal"),
@@ -34,4 +34,4 @@ class ResCompany(models.Model):
         ("177", "(0177) Banco de la Fuerza Armada Nacional Bolivariana (BANFANB)"),
         ("191", "(0191) Banco Nacional de Crédito (BNC)")
     ])
-    url = fields.Char()
+    url_sitef = fields.Char()
