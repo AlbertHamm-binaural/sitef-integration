@@ -20,7 +20,7 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
         if (this.referencia.el.value != "" && this.telefono.el.value != "" && this.banco.el.value != "" && this.fecha.el.value != "") {
             let username = this.env.pos.config.username;
             let password = this.env.pos.config.encrypted_password;
-
+            let url = this.env.pos.config.url;
             let idbranch = this.env.pos.config.idbranch;        
             let codestall = this.env.pos.config.codestall;
             let receivingbank = parseInt(this.env.pos.config.issuingbank, 10);
@@ -32,9 +32,9 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
             let debitphone = '58' + telefono.substring(1);
             let trxdate = this.fecha.el.value;
 
-            const token = await this.generarToken(username, password);
+            const token = await this.generarToken(url, username, password);
             if (token) {
-                const pago = await this.validarPago(username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate);
+                const pago = await this.validarPago(url, username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate);
             }
         } else {
             this.showPopup('ErrorPopup', {
@@ -44,10 +44,10 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
         }
     }
 
-    async generarToken(username, password) {
+    async generarToken(url, username, password) {
         const result = await ajax.jsonRpc(
             "/sitef_pos_integration/get_token", "call",
-            { username, password }
+            { url, username, password }
         );
         if (result.error) {
             this.showPopup('ErrorPopup', {
@@ -59,11 +59,11 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
         }
     }
     
-    async validarPago(username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate) {
+    async validarPago(url, username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate) {
         try {
             const result = await ajax.jsonRpc(
                 "/sitef_pos_integration/validarPago_sitef", "call",
-                { username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate }
+                { url, username, token, idbranch, codestall, amount, paymentreference, debitphone, origenbank, receivingbank, trxdate }
             );
             if (result == "marcada") {
                 this.showPopup('ConfirmPopup', {

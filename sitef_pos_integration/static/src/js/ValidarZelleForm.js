@@ -25,6 +25,7 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
         if (this.fecha.el.value != "") {
             let username = this.env.pos.config.username;
             let password = this.env.pos.config.encrypted_password;
+            let url = this.env.pos.config.url;
             let idbranch = this.env.pos.config.idbranch;
             let codestall = this.env.pos.config.codestall;
 
@@ -32,9 +33,9 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
 
             let amount = this.state.amount;
 
-            const token = await this.generarToken(username, password);
+            const token = await this.generarToken(url, username, password);
             if (token) {
-                const cambio = await this.validarZelle(username, token, idbranch, codestall, amount, trxdate);
+                const cambio = await this.validarZelle(url, username, token, idbranch, codestall, amount, trxdate);
             }
         } else {
             this.showPopup('ErrorPopup', {
@@ -53,10 +54,10 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
         }
     }
 
-    async generarToken(username, password) {
+    async generarToken(url, username, password) {
         const result = await ajax.jsonRpc(
             "/sitef_pos_integration/get_token", "call",
-            { username, password }
+            { url, username, password }
         );
         if (result.error) {
             this.showPopup('ErrorPopup', {
@@ -69,11 +70,11 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
         }
     }
 
-    async validarZelle(username, token, idbranch, codestall, amount, trxdate) {
+    async validarZelle(url, username, token, idbranch, codestall, amount, trxdate) {
         try {
             const result = await ajax.jsonRpc(
                 "/sitef_pos_integration/validarZelle_sitef", "call",
-                { username, token, idbranch, codestall, amount, trxdate }
+                { url, username, token, idbranch, codestall, amount, trxdate }
             );
             if (result == "marcada") {
                 this.showPopup('ConfirmPopup', {

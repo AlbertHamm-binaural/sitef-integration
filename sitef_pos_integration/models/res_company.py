@@ -34,3 +34,4 @@ class ResCompany(models.Model):
         ("177", "(0177) Banco de la Fuerza Armada Nacional Bolivariana (BANFANB)"),
         ("191", "(0191) Banco Nacional de Crédito (BNC)")
     ])
+    url = fields.Char()
