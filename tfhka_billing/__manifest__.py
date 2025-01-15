@@ -14,6 +14,7 @@
     "application": True,
     "data": [
         "views/res_config_settings.xml",
+        "views/view_move_form.xml",
     ],
     
     # "assets": {

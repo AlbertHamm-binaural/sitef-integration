@@ -1,1 +1,1 @@
-from . import res_company, res_config_settings
+from . import res_company, res_config_settings, account_move
