@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="button_enviar" string="Enviar a The Factory HKA" type="object" class="oe_highlight"/>
+                <button name="Emision" string="Enviar a The Factory HKA" type="object" class="oe_highlight"/>
             </xpath>
         </field>
     </record>
