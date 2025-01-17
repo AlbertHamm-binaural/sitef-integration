@@ -64,4 +64,3 @@ class AccountMove(models.Model):
                 raise UserError("USERNAME o PASSWORD vacío.")
             
         _logger.info(f"Username: {username}, Password: {password}, URL: {url}")
-        _logger.info("Hello") 
