@@ -10,12 +10,11 @@ const ajax = require('web.ajax');
 class ValidarZelleForm extends AbstractAwaitablePopup {
     setup() {
         super.setup();
-        this.tipDoc = useRef('tipDocSelect');
-        this.doc = useRef('docInput');
-        this.ref = useRef('refInput');
+        this.aut = useRef('inputAutorizacion');
         this.banco = useRef('bancoSelect');
         this.fecha = useRef('fecha');
-
+        this.phone = useRef('phoneInput');
+        this.seq = useRef('seqInput');
         this.state = useState({ amount: 0 });
 
         this.initializeAmount();
@@ -29,13 +28,17 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
             let idbranch = this.env.pos.config.idbranch_sitef;
             let codestall = this.env.pos.config.codestall_sitef;
 
+            let authorizationcode = this.aut.el.value;
+            let phonenumber = this.phone.el.value;
+            let sequentialnumber = this.seq.el.value;
+
             let trxdate = this.fecha.el.value;
 
             let amount = this.state.amount;
 
             const token = await this.generarToken(url, username, password);
             if (token) {
-                const cambio = await this.validarZelle(url, username, token, idbranch, codestall, amount, trxdate);
+                const cambio = await this.validarZelle(url, username, token, idbranch, codestall, amount, trxdate, authorizationcode, phonenumber, sequentialnumber);
             }
         } else {
             this.showPopup('ErrorPopup', {
@@ -70,11 +73,11 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
         }
     }
 
-    async validarZelle(url, username, token, idbranch, codestall, amount, trxdate) {
+    async validarZelle(url, username, token, idbranch, codestall, amount, trxdate, authorizationcode, phonenumber, sequentialnumber) {
         try {
             const result = await ajax.jsonRpc(
                 "/sitef_pos_integration/validarZelle_sitef", "call",
-                { url, username, token, idbranch, codestall, amount, trxdate }
+                { url, username, token, idbranch, codestall, amount, trxdate, authorizationcode, phonenumber, sequentialnumber }
             );
             if (result == "marcada") {
                 this.showPopup('ConfirmPopup', {

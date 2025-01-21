@@ -5,12 +5,37 @@
                 <p>Zelle</p>
             </header>
             <main class="body">
+                <div class="form-group-horizontal" style="display: flex; justify-content: space-between;">
+                    <div class="form-group">
+                        <label class="subtitle">Authorization Code</label>
+                        <input type="text" class="input" t-ref="inputAutorizacion" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="subtitle">Phone Number</label>
+                        <input type="text" class="input" t-ref="phoneInput" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
+                    </div>
+                </div>
+                <div class="form-group" style = "width: 100%;">
+                    <label class="subtitle">Sequential Number</label>
+                    <input type="text" class="input" t-ref="seqInput" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
+                </div>
+                <div class="form-group" style = "width: 100%;">
+                    <label class="subtitle">Bank</label>
+                    <select class="input" t-ref="bancoSelect">
+                        <option value="">Seleccionar un banco...</option>
+                        <option value="1">BOFA</option>
+                        <option value="2">CHASE</option>
+                        <option value="3">BANESCO USA</option>
+                        <option value="4">TRUIST BANK</option>
+                        <option value="5">WELLS FARGO</option>
+                    </select>
+                </div>
                 <div class="form-date">
-                    <label class="subtitle">Fecha</label>
+                    <label class="subtitle">Date</label>
                     <input type="date" t-ref="fecha" class="input" t-att-value="(new Date(Date.now() - 4 * 60 * 60 * 1000)).toISOString().split('T')[0]"/>
                 </div>
                 <div class="form-group monto-container">
-                    <label class="subtitle">Monto</label>
+                    <label class="subtitle">Amount</label>
                     <t t-esc="state.amount" class="input"/>$
                 </div>
             </main>

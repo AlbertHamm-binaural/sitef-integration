@@ -167,7 +167,7 @@ class SitefController(http.Controller):
             return {"error": f"Error en la solicitud: {response.status_code}"}
         
     @http.route('/sitef_pos_integration/validarZelle_sitef', type='json', methods=['POST'])
-    def validarZelle_sitef(self, url, username, token, idbranch, codestall, amount, trxdate):
+    def validarZelle_sitef(self, url, username, token, idbranch, codestall, amount, trxdate, sequentialnumber, phonenumber, authorizationcode):
         _logger.warning("INSIDE VALIDAR TRANSFERENCIA SITEF")
         headers = {
             "Authorization": f"Bearer {token}"
@@ -179,7 +179,9 @@ class SitefController(http.Controller):
             "idbranch": idbranch,
             "codestall": codestall,
             "amount": amount,
-            "invoicenumber": "ITL-004568",
+            "sequentialnumber": sequentialnumber,
+            "phonenumber": phonenumber,
+            "authorizationcode": authorizationcode,
             "trxdate": trxdate
         }, headers=headers)
         
