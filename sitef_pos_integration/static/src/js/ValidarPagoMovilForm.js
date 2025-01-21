@@ -84,7 +84,7 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
                 return result;
             } else {
                 this.showPopup('ErrorPopup', {
-                    title: this.env._t("Error: ") + result.error_code,
+                    title: this.env._t(result.error_code),
                     body: this.env._t(result.description),
                 });
                 return null;
