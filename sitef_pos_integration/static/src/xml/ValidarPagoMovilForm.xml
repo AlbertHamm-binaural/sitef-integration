@@ -2,6 +2,11 @@
     <t t-name="ValidarPagoMovilForm" owl="1">
         <div class="popup">
             <header class="title drag-handle">
+                <div class="top-right">
+                    <t t-esc="mostrarBanco()" class="input"/><br/>
+                    <t t-esc="env.pos.config.issuingid_pm_sitef" class="input"/><br/>
+                    <t t-esc="env.pos.config.issuingmobilenumber_pm_sitef" class="input"/>
+                </div>
                 <p>Validar Pago Móvil</p>
             </header>
             <main class="body">
@@ -12,7 +17,16 @@
                     </div>
                     <div class="form-group">
                         <label class="subtitle">Teléfono</label>
-                        <input type="text" class="input" t-ref="telefonoInput" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
+                        <div class="form-group-horizontal">
+                            <select class="input-select" t-ref="tipNumSelect">
+                                <option value="0414">0414</option>
+                                <option value="0424">0424</option>
+                                <option value="0412">0412</option>
+                                <option value="0416">0416</option>
+                                <option value="0426">0426</option>
+                            </select>
+                            <input type="text" class="input" t-ref="telefonoInput" maxlength="7" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">

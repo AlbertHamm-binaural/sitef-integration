@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@data-key='point_of_sale']" position="inside">
-                <h2>Sitef</h2>
+                <h2>Configuración (Sitef)</h2>
                 <div class="row mt16 o_settings_container">
                     <div class="col12 col-lg-6">
                         <div class="form-group">
@@ -41,10 +41,49 @@
                                 <field name="codestall_sitef"/>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <h2>Datos de Pago (Sitef)</h2>
+                <div class="row mt16 o_settings_container">
+                    <div class="col12 col-lg-6">
+                    <h3><b><u>Pago Móvil</u></b></h3>
                         <div class="form-group">
-                            <label for="issuingbank_sitef" class="col-form-label">Banco Emisor</label>
+                            <label for="issuingbank_pm_sitef" class="col-form-label">Banco Emisor</label>
                             <div class="col-sm-8">
-                                <field name="issuingbank_sitef" widget="selection"/>
+                                <field name="issuingbank_pm_sitef" widget="selection"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="issuingid_pm_sitef" class="col-form-label">Identificación Emisor</label>
+                            <div class="col-sm-8">
+                                <field name="issuingid_pm_sitef"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="issuingmobilenumber_pm_sitef" class="col-form-label">Número Telefónico Emisor</label>
+                            <div class="col-sm-8">
+                                <field name="issuingmobilenumber_pm_sitef"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col12 col-lg-6">
+                    <h3><b><u>Transferencia Bancaria</u></b></h3>
+                        <div class="form-group">
+                            <label for="issuingbank_trf_sitef" class="col-form-label">Banco Emisor</label>
+                            <div class="col-sm-8">
+                                <field name="issuingbank_trf_sitef" widget="selection"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="issuingid_trf_sitef" class="col-form-label">Identificación Emisor</label>
+                            <div class="col-sm-8">
+                                <field name="issuingid_trf_sitef"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="issuingnumber_trf_sitef" class="col-form-label">Número de cuenta Emisor</label>
+                            <div class="col-sm-8">
+                                <field name="issuingnumber_trf_sitef"/>
                             </div>
                         </div>
                     </div>

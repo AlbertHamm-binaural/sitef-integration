@@ -2,6 +2,11 @@
     <t t-name="ValidarTransferenciaForm" owl="1">
         <div class="popup">
             <header class="title drag-handle">
+                <div class="top-right">
+                    <t t-esc="mostrarBanco()" class="input"/><br/>
+                    <t t-esc="env.pos.config.issuingid_trf_sitef" class="input"/><br/>
+                    <t t-esc="env.pos.config.issuingnumber_trf_sitef" class="input"/>
+                </div>
                 <p>Transferencia</p>
             </header>
             <main class="body">

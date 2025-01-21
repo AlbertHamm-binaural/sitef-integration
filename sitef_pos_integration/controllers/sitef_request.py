@@ -64,10 +64,10 @@ class SitefController(http.Controller):
                             "error_code": "Cédula o teléfono inválido",
                             "description": error_list[0]["description"]
                         }
-                    else:
+                    elif (error_list[0]["error_code"] == "9999"):
                         return {
-                            "error_code": error_list[0]["error_code"],
-                            "description": error_list[0]["description"]
+                            "error_code": "Teléfono inválido",
+                            "description": "Ingrese un número de teléfono válido"
                         }
                 else:
                     return {
@@ -109,10 +109,21 @@ class SitefController(http.Controller):
                 _logger.error("Error en la solicitud.")
                 error_list = response_json["data"]["error_list"]
                 if isinstance(error_list, list) and len(error_list) > 0:
-                    return {
-                        "error_code": "Datos no encontrados",
-                        "description": error_list[0]["description"]
-                    }
+                    if (error_list[0]["error_code"] == "500"):
+                        return {
+                            "error_code": "Datos no encontrados",
+                            "description": error_list[0]["description"]
+                        }
+                    elif (error_list[0]["error_code"] == "9999"):
+                        return {
+                            "error_code": "Teléfono inválido",
+                            "description": "Ingrese un número de teléfono válido"
+                        }
+                    else:
+                        return {
+                            "error_code": "Datos no encontrados",
+                            "description": error_list[0]["description"]
+                        }
                 else:
                     return {
                         "error_code": "unknown",
@@ -153,10 +164,21 @@ class SitefController(http.Controller):
                 _logger.error("Error en la solicitud.")
                 error_list = response_json["data"]["error_list"]
                 if isinstance(error_list, list) and len(error_list) > 0:
-                    return {
-                        "error_code": "Datos no encontrados",
-                        "description": error_list[0]["description"]
-                    }
+                    if (error_list[0]["error_code"] == "500"):
+                        return {
+                            "error_code": "Datos no encontrados",
+                            "description": error_list[0]["description"]
+                        }
+                    elif (error_list[0]["error_code"] == "9999"):
+                        return {
+                            "error_code": "Número de referencia inválida",
+                            "description": "El número de la referencia no pudo ser encontrado"
+                        }
+                    else:
+                        return {
+                            "error_code": "Datos no encontrados",
+                            "description": error_list[0]["description"]
+                        }
                 else:
                     return {
                         "error_code": "unknown",

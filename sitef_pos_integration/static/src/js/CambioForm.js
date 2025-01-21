@@ -12,6 +12,7 @@ class CambioForm extends AbstractAwaitablePopup {
         super.setup();
         this.tipDoc = useRef('tipDocSelect');
         this.doc = useRef('docInput');
+        this.tipNum = useRef('tipNumSelect')
         this.telefono = useRef('telefonoInput');
         this.banco = useRef('bancoSelect');
     }
@@ -23,15 +24,16 @@ class CambioForm extends AbstractAwaitablePopup {
             let url = this.env.pos.config.url_sitef;
             let idbranch = this.env.pos.config.idbranch_sitef;        
             let codestall = this.env.pos.config.codestall_sitef;
-            let issuingbank = parseInt(this.env.pos.config.issuingbank_sitef, 10);
+            let issuingbank = parseInt(this.env.pos.config.issuingbank_pm_sitef, 10);
     
             let tipDoc = this.tipDoc.el.value;
             let doc = this.doc.el.value;
-            let telefono = this.telefono.el.value;
-    
+            let telefono = this.tipNum.el.value + this.telefono.el.value;
+            
             let destinationbank = parseInt(this.banco.el.value, 10);
             let amount = this.props.amount;
             let destinationid = tipDoc + doc;
+
             let destinationmobilenumber = '58' + telefono.substring(1);
             
             const token = await this.generarToken(url, username, password);
