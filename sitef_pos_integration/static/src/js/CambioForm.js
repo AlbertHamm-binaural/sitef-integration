@@ -2,7 +2,7 @@
 
 import AbstractAwaitablePopup from 'point_of_sale.AbstractAwaitablePopup';
 import Registries from 'point_of_sale.Registries';
-import { useRef } from "@odoo/owl";
+import { useRef, useState } from "@odoo/owl";
 import { _lt } from 'web.core';
 
 const ajax = require('web.ajax');
@@ -15,9 +15,11 @@ class CambioForm extends AbstractAwaitablePopup {
         this.tipNum = useRef('tipNumSelect')
         this.telefono = useRef('telefonoInput');
         this.banco = useRef('bancoSelect');
+        this.isDisabled = useState({value: false});
     }
     
     async confirm() {
+        this.isDisabled.value = true;
         if (this.doc.el.value != "" && this.telefono.el.value != "" && this.banco.el.value != "") {
             let username = this.env.pos.config.username_sitef;
             let password = this.env.pos.config.encrypted_password;
@@ -46,6 +48,7 @@ class CambioForm extends AbstractAwaitablePopup {
                 body: this.env._t('Debe ingresar TODOS los campos')
             });
         }
+        this.isDisabled.value = false;
     }
 
     async generarToken(url, username, password) {

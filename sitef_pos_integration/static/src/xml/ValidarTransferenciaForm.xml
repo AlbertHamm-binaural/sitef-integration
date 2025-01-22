@@ -2,12 +2,14 @@
     <t t-name="ValidarTransferenciaForm" owl="1">
         <div class="popup">
             <header class="title drag-handle">
-                <div class="top-right">
+                <p class="titulo">Validar Transferencia</p>
+                <img src="/sitef_pos_integration/static/src/img/logo-sitef.png" class="img-logo" alt="Logo Sitef"/>
+                <i class="fa fa-info-circle mostrar-datos" title="Mostrar Datos" t-on-click="mostrarDatos"></i>
+                <div class="top-right" id="datosPago">
                     <t t-esc="mostrarBanco()" class="input"/><br/>
                     <t t-esc="env.pos.config.issuingid_trf_sitef" class="input"/><br/>
                     <t t-esc="env.pos.config.issuingnumber_trf_sitef" class="input"/>
                 </div>
-                <p>Transferencia</p>
             </header>
             <main class="body">
                 <div class="form-group-horizontal">
@@ -69,10 +71,10 @@
                 </div>
             </main>
             <footer class="footer">
-                <div class="button confirm" t-on-click="confirm">
+                <div class="button confirm" t-on-click="confirm" t-att-class="{ 'opaque': isDisabled.value }">
                     <t t-esc="props.confirmText" />
                 </div>
-                <div class="button cancel" t-on-click="cancel">
+                <div class="button cancel" t-on-click="cancel" t-att-class="{ 'opaque': isDisabled.value }">
                     <t t-esc="props.cancelText" />
                 </div>
             </footer>

@@ -2,7 +2,8 @@
     <t t-name="CambioForm" owl="1">
         <div class="popup">
             <header class="title drag-handle">
-                <p>Cambio</p>
+                <p class="titulo">Cambio</p>
+                <img src="/sitef_pos_integration/static/src/img/logo-sitef.png" class="img-logo" alt="Logo Sitef"/>
             </header>
             <main class="body">
                 <div class="form-group-horizontal">
@@ -69,10 +70,10 @@
                 </div>
             </main>
             <footer class="footer">
-                <div class="button confirm" t-on-click="confirm">
+                <div class="button confirm" t-on-click="confirm" t-att-class="{ 'opaque': isDisabled.value }">
                     <t t-esc="props.confirmText" />
                 </div>
-                <div class="button cancel" t-on-click="cancel">
+                <div class="button cancel" t-on-click="cancel" t-att-class="{ 'opaque': isDisabled.value }">
                     <t t-esc="props.cancelText" />
                 </div>
             </footer>

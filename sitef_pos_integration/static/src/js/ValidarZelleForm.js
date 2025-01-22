@@ -16,11 +16,13 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
         this.phone = useRef('phoneInput');
         this.seq = useRef('seqInput');
         this.state = useState({ amount: 0 });
+        this.isDisabled = useState({value: false});
 
         this.initializeAmount();
     }
 
     async confirm() {
+        this.isDisabled.value = true;
         if (this.fecha.el.value != "") {
             let username = this.env.pos.config.username_sitef;
             let password = this.env.pos.config.encrypted_password;
@@ -46,15 +48,18 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
                 body: this.env._t('Debe ingresar TODOS los campos')
             });
         }
+        this.isDisabled.value = false;
     }
 
     async initializeAmount() {
+        this.isDisabled.value = true;
         const bcv = await this.BCV();
         if (bcv) {
             this.state.amount = (this.props.amount / bcv).toFixed(2);
         } else {
             this.state.amount = NaN; 
         }
+        this.isDisabled.value = false;
     }
 
     async generarToken(url, username, password) {

@@ -2,7 +2,7 @@
 
 import AbstractAwaitablePopup from 'point_of_sale.AbstractAwaitablePopup';
 import Registries from 'point_of_sale.Registries';
-import { useRef } from "@odoo/owl";
+import { useRef, useState } from "@odoo/owl";
 import { _lt } from 'web.core';
 
 const ajax = require('web.ajax');
@@ -15,9 +15,11 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
         this.telefono = useRef('telefonoInput');
         this.banco = useRef('bancoSelect');
         this.fecha = useRef('fecha');
+        this.isDisabled = useState({value: false});
     }
 
     async confirm() {
+        this.isDisabled.value = true;
         if (this.referencia.el.value != "" && this.telefono.el.value != "" && this.banco.el.value != "" && this.fecha.el.value != "") {
             let username = this.env.pos.config.username_sitef;
             let password = this.env.pos.config.encrypted_password;
@@ -43,6 +45,7 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
                 body: this.env._t('Debe ingresar TODOS los campos')
             });
         }
+        this.isDisabled.value = false;
     }
 
     async generarToken(url, username, password) {
@@ -107,26 +110,34 @@ class ValidarPagoMovilForm extends AbstractAwaitablePopup {
             114: '(0114) Banco del Caribe',
             115: '(0115) Banco Exterior',
             128: '(0128) Banco Caroní',
-            134: '(0134) Banesco Banco Universal',
-            137: '(0137) Banco Sofitasa Banco Universal',
-            138: '(0138) Banco Plaza, Banco Universal',
+            134: '(0134) Banesco',
+            137: '(0137) Banco Sofitasa',
+            138: '(0138) Banco Plaza',
             146: '(0146) Banco de la Gente Emprendedora',
             151: '(0151) Banco Fondo Común',
-            156: '(0156) 100% Banco, Banco Comercial, C.A',
-            157: '(0157) DelSur, Banco Universal',
-            163: '(0163) Banco del Tesoro, Banco Universal',
-            166: '(0166) Banco Agrícola de Venezuela, Banco Universal',
-            168: '(0168) Bancrecer S.A., Banco Microfinanciero',
-            169: '(0169) Mi Banco, Banco Microfinanciero',
-            171: '(0171) Banco Activo, Banco Universal',
-            172: '(0172) Bancamiga Banco Universal',
-            173: '(0173) Banco Internacional de Desarrollo, Banco Universal',
-            174: '(0174) Banplus Banco Universal',
-            175: '(0175) Banco Bicentenario del Pueblo, Banco Universal',
-            177: '(0177) Banco de la Fuerza Armada Nacional Bolivariana (BANFANB)',
-            191: '(0191) Banco Nacional de Crédito (BNC)',
+            156: '(0156) 100% Banco',
+            157: '(0157) DelSur',
+            163: '(0163) Banco del Tesoro',
+            166: '(0166) Banco Agrícola de Venezuela',
+            168: '(0168) Bancrecer',
+            169: '(0169) Mi Banco',
+            171: '(0171) Banco Activo',
+            172: '(0172) Bancamiga',
+            173: '(0173) Banco Internacional de Desarrollo',
+            174: '(0174) Banplus',
+            175: '(0175) Banco Bicentenario del Pueblo',
+            177: '(0177) BANFANB',
+            191: '(0191) Banco Nacional de Crédito',
         };
         return bancos[this.env.pos.config.issuingbank_pm_sitef]
+    }
+    mostrarDatos() {
+        var $div = $('#datosPago');
+        if ($div.is(':visible')) {
+            $div.slideUp();
+        } else {
+            $div.slideDown();
+        }
     }
 }
 
