@@ -13,6 +13,7 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
         this.aut = useRef('inputAutorizacion');
         this.banco = useRef('bancoSelect');
         this.fecha = useRef('fecha');
+        this.fechaActual = useState({value: (new Date(Date.now() - 4 * 60 * 60 * 1000)).toISOString().split('T')[0]})
         this.phone = useRef('phoneInput');
         this.seq = useRef('seqInput');
         this.state = useState({ amount: 0 });
@@ -23,7 +24,8 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
 
     async confirm() {
         this.isDisabled.value = true;
-        if (this.fecha.el.value != "") {
+        this.fechaActual.value = this.fecha.el.value
+        if (this.aut.el.value != "" && this.phone.el.value != "" && this.seq.el.value != "" && this.banco.el.value != "" && this.fecha.el.value != "") {
             let username = this.env.pos.config.username_sitef;
             let password = this.env.pos.config.encrypted_password;
             let url = this.env.pos.config.url_sitef;
@@ -69,7 +71,7 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
         );
         if (result.error) {
             this.showPopup('ErrorPopup', {
-                title: this.env._t('Error al generar token'),
+                title: this.env._t(result.title_error),
                 body: this.env._t(result.error),
             });
             return null
@@ -101,6 +103,13 @@ class ValidarZelleForm extends AbstractAwaitablePopup {
                     body: this.env._t('La Zelle ya fue validada anteriormente'),
                 });
                 return result;
+            }
+            else if (result.error) {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t(result.title_error),
+                    body: this.env._t(result.error),
+                });
+                return null;
             } else {
                 this.showPopup('ErrorPopup', {
                     title: this.env._t(result.error_code),

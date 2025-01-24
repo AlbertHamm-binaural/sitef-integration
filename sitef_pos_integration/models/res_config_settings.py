@@ -22,3 +22,8 @@ class ResConfigSettings(models.TransientModel):
     issuingnumber_trf_sitef = fields.Char(related="company_id.issuingnumber_trf_sitef", string="Número de cuenta Emisor (Transferencia Bancaria)", readonly=False)
     
     url_sitef = fields.Char(related="company_id.url_sitef", string="URL", readonly=False)
+    
+    activated_cpm_sitef = fields.Boolean(related="company_id.activated_cpm_sitef", string="Activar Cambio (Pago Móvil)", readonly=False)
+    activated_pm_sitef = fields.Boolean(related="company_id.activated_pm_sitef", string="Activar Pago Móvil", readonly=False)
+    activated_trf_sitef = fields.Boolean(related="company_id.activated_trf_sitef", string="Activar Transferencia", readonly=False)
+    activated_zelle_sitef = fields.Boolean(related="company_id.activated_zelle_sitef", string="Activar Zelle", readonly=False)

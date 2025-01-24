@@ -66,3 +66,8 @@ class ResCompany(models.Model):
     issuingmobilenumber_pm_sitef = fields.Char()
     issuingnumber_trf_sitef = fields.Char()
     url_sitef = fields.Char()
+    
+    activated_cpm_sitef = fields.Boolean()
+    activated_pm_sitef = fields.Boolean()
+    activated_trf_sitef = fields.Boolean()
+    activated_zelle_sitef = fields.Boolean()

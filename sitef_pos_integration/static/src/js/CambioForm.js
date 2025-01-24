@@ -58,7 +58,7 @@ class CambioForm extends AbstractAwaitablePopup {
         );
         if (result.error) {
             this.showPopup('ErrorPopup', {
-                title: this.env._t('Error al generar token'),
+                title: this.env._t(result.title_error),
                 body: this.env._t(result.error),
             });
             return null
@@ -83,6 +83,12 @@ class CambioForm extends AbstractAwaitablePopup {
                     response: { confirmed: true, payload: await this.getPayload() },
                 });    
                 return result;
+            } else if (result.error) {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t(result.title_error),
+                    body: this.env._t(result.error),
+                });
+                return null;
             } else {
                 this.showPopup('ErrorPopup', {
                     title: this.env._t(result.error_code),

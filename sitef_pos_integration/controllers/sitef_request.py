@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 class SitefController(http.Controller):
     @http.route('/sitef_pos_integration/get_token', type='json', methods=['POST'])
     def get_token(self, url, username, password):
-        if username != "" and password != "":
+        if url and username and password:
             _logger.warning("INSIDE GET TOKEN")
             response = requests.post(url + "/sitef/apiToken", json={
                 "username": username,
@@ -22,9 +22,11 @@ class SitefController(http.Controller):
                 token = response_json["data"]["token"]
                 return token
             else:
-                return {"error": "Campo username o password incorrecto."}
+                return {"title_error": "Configuración del Módulo incorrecta",
+                        "error": "Campo username o password incorrecto."}
         else:
-            return {"error": "Campo username o password vacío."}
+            return {"title_error": "Configuración del Módulo incompleta",
+                    "error": "Campo username, password o url vacío."}
     
     @http.route('/sitef_pos_integration/cambio_sitef', type='json', methods=['POST'])
     def cambio_sitef(self, url, username, token, idbranch, codestall, destinationid, destinationmobilenumber, destinationbank, issuingbank, amount):
@@ -42,7 +44,7 @@ class SitefController(http.Controller):
             "destinationmobilenumber": destinationmobilenumber, 
             "destinationbank": destinationbank,
             "issuingbank": issuingbank, 
-            "invoicenumber": "4143320592",
+            "invoicenumber": "12345",
             "amount": amount
         }, headers=headers)
         
@@ -55,6 +57,11 @@ class SitefController(http.Controller):
                     "trx_status": response_json["data"]["transaction_c2p_response"]["trx_status"],
                     "payment_reference": response_json["data"]["transaction_c2p_response"]["payment_reference"],
                 }
+            elif "code" in response_json and response_json["code"] == 204 and "messages" in response_json:
+                return {
+                    "title_error": "Configuración del Módulo incorrecta",
+                    "error": response_json["messages"][0]["message"]
+                }
             else:
                 _logger.error("Error en la solicitud.")
                 error_list = response_json["data"]["error_list"]
@@ -65,10 +72,16 @@ class SitefController(http.Controller):
                             "description": error_list[0]["description"]
                         }
                     elif (error_list[0]["error_code"] == "9999"):
-                        return {
-                            "error_code": "Teléfono inválido",
-                            "description": "Ingrese un número de teléfono válido"
-                        }
+                        if (error_list[0]["description"] == "\n Banco Emisor no Afiliado"):
+                            return {
+                                "error_code": "Configuración del Módulo incorrecta",
+                                "description": "Banco Emisor no Afiliado"
+                            }
+                        elif (error_list[0]["description"] == "Error en el campo Error en el campo 'destinationMobileNumber'"):
+                            return {
+                                "error_code": "Teléfono inválido",
+                                "description": "Ingrese un número de teléfono válido"
+                            }
                 else:
                     return {
                         "error_code": "unknown",
@@ -105,6 +118,11 @@ class SitefController(http.Controller):
             
             if "data" in response_json and "marcada" in response_json["data"]:
                 return response_json["data"]["marcada"]
+            elif "code" in response_json and response_json["code"] == 204 and "messages" in response_json:
+                return {
+                    "title_error": "Configuración del Módulo incorrecta",
+                    "error": response_json["messages"][0]["message"]
+                }
             else:
                 _logger.error("Error en la solicitud.")
                 error_list = response_json["data"]["error_list"]
@@ -115,10 +133,16 @@ class SitefController(http.Controller):
                             "description": error_list[0]["description"]
                         }
                     elif (error_list[0]["error_code"] == "9999"):
-                        return {
-                            "error_code": "Teléfono inválido",
-                            "description": "Ingrese un número de teléfono válido"
-                        }
+                        if (error_list[0]["description"] == "\n Banco Emisor no Afiliado"):
+                            return {
+                                "error_code": "Configuración del Módulo incorrecta",
+                                "description": "Banco Emisor no Afiliado"
+                            }
+                        elif (error_list[0]["description"] == "Error en el campo Error en el campo 'destinationMobileNumber'"):
+                            return {
+                                "error_code": "Teléfono inválido",
+                                "description": "Ingrese un número de teléfono válido"
+                            }
                     else:
                         return {
                             "error_code": "Datos no encontrados",
@@ -143,13 +167,13 @@ class SitefController(http.Controller):
         response = requests.post(url + "/sitefAuth/getTrfSitef", json={
             "username": username,
             "token": token_md5,
-            "idbranch": idbranch,
-            "codestall": codestall,
+            "idBranch": idbranch,
+            "codeStall": codestall,
             "amount": amount,
-            "paymenreference": paymenreference,
-            "origendni": origendni,
+            "paymentReference": paymenreference,
+            "origenDni": origendni,
             "origenbank": origenbank,
-            "receivingbank": receivingbank,
+            "receivingBank": receivingbank,
             "origenbank": origenbank,
             "trxdate": trxdate
         }, headers=headers)
@@ -160,6 +184,11 @@ class SitefController(http.Controller):
             
             if "data" in response_json and "marcada" in response_json["data"]:
                 return response_json["data"]["marcada"]
+            elif "code" in response_json and response_json["code"] == 204 and "messages" in response_json:
+                return {
+                    "title_error": "Configuración del Módulo incorrecta",
+                    "error": response_json["messages"][0]["message"]
+                }
             else:
                 _logger.error("Error en la solicitud.")
                 error_list = response_json["data"]["error_list"]
@@ -169,10 +198,20 @@ class SitefController(http.Controller):
                             "error_code": "Datos no encontrados",
                             "description": error_list[0]["description"]
                         }
-                    elif (error_list[0]["error_code"] == "9999"):
+                    elif (error_list[0]["error_code"] == "141128"):
                         return {
                             "error_code": "Número de referencia inválida",
-                            "description": "El número de la referencia no pudo ser encontrado"
+                            "description": error_list[0]["description"]
+                        }
+                    elif (error_list[0]["error_code"] == "-900"):
+                        return {
+                            "error_code": "Número de documento inválida",
+                            "description": "El campo de documento debe tener más de 6 caracteres."
+                        }
+                    elif (error_list[0]["error_code"] == "9999"):
+                        return {
+                            "error_code": "Configuración del Módulo incorrecta",
+                            "description": "Banco Emisor no Afiliado"
                         }
                     else:
                         return {

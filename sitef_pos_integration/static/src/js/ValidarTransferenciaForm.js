@@ -15,11 +15,13 @@ class ValidarTransferenciaForm extends AbstractAwaitablePopup {
         this.ref = useRef('refInput');
         this.banco = useRef('bancoSelect');
         this.fecha = useRef('fecha');
+        this.fechaActual = useState({value: (new Date(Date.now() - 4 * 60 * 60 * 1000)).toISOString().split('T')[0]})
         this.isDisabled = useState({value: false});
     }
 
     async confirm() {
         this.isDisabled.value = true;
+        this.fechaActual.value = this.fecha.el.value
         if (this.doc.el.value != "" && this.ref.el.value != "" && this.banco.el.value != "" && this.fecha.el.value != "" ) {
             let username = this.env.pos.config.username_sitef;
             let password = this.env.pos.config.encrypted_password;
@@ -57,7 +59,7 @@ class ValidarTransferenciaForm extends AbstractAwaitablePopup {
         );
         if (result.error) {
             this.showPopup('ErrorPopup', {
-                title: this.env._t('Error al generar token'),
+                title: this.env._t(result.title_error),
                 body: this.env._t(result.error),
             });
             return null
@@ -89,6 +91,13 @@ class ValidarTransferenciaForm extends AbstractAwaitablePopup {
                     body: this.env._t('La transferencia ya fue validada anteriormente'),
                 });
                 return result;
+            } 
+            else if (result.error) {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t(result.title_error),
+                    body: this.env._t(result.error),
+                });
+                return null;
             } else {
                 this.showPopup('ErrorPopup', {
                     title: this.env._t(result.error_code),
