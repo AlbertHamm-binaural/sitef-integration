@@ -8,19 +8,70 @@ class AccountMove(models.Model):
 
     _inherit = 'account.move'
 
-    def Emision(self):          
-        url,token = self.GenerarToken()
+    def AsignarNumeracion(self):
+        url, token = self.GenerarToken()
+        hasta, inicio = self.ConsultaNumeracion()
+        fin = inicio + 20
+        
         _logger.info(f"URL: {url} / TOKEN: {token}")
         headers = {
             "Authorization": f"Bearer {token}"
         }
-        respuesta = requests.post(url + "/Emision", json={
+        
+        response = requests.post(url + "/AsignarNumeraciones", json={
             "token": token,
-        })
+            "serie": "",
+            "tipoDocumento": "01",
+            "numeroDocumentoInicio": inicio,
+            "numeroDocumentoFin": fin
+        }, headers=headers)
+        
+        if inicio <= hasta:
+            if response.status_code == 200:
+                _logger.info("Rango asignado correctamente")
+                return
+            elif response.status_code == 203:
+                _logger.warning(f"Error al asignar el rango: {response.status_code}")
+                raise UserError("Error al asignar el rango.")
+            else:
+                _logger.error(f"Error: {response.status_code}")
+                raise UserError(f"Error: {response.status_code}")
+        else:
+            _logger.error("El rango de numeración asignado ha sido superado.")
+            raise UserError("El rango de numeración asignado ha sido superado.")
 
-    def GenerarToken(self):
-            
-        username, password, url = self.ObtenerCredenciales()
+    def ConsultaNumeracion(self):
+        url, token = self.GenerarToken()
+        _logger.info(f"URL: {url} / TOKEN: {token}")
+
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+        
+        response = requests.post(url + "/ConsultaNumeraciones", json={
+                "token": token,
+                "serie": "",
+                "tipoDocumento": "",
+                "prefix": ""
+            }, headers=headers)
+        
+        if response.status_code == 200:
+            _logger.info("Numeración consultada correctamente")
+            respuesta_json = response.json()
+            if respuesta_json.get("codigo") == "200" and "numeraciones" in respuesta_json:
+                numeracion = respuesta_json["numeraciones"][0]
+                hasta = numeracion.get("hasta")
+                inicio = numeracion.get("correlativo")
+                return hasta, inicio
+            else:
+                _logger.error("No existen numeraciones que coincidan con los criterios aplicados o que cuenten con disponibilidad.")
+                raise UserError("Error al obtener numeraciones.")
+        else:
+            _logger.error(f"Error: {response.status_code}")
+            raise UserError(f"Error: {response.status_code}")
+
+    def GenerarToken(self):           
+        username, password, url, maximaNumeracion = self.ObtenerCredenciales()
         
         respuesta = requests.post(url + "/Autenticacion", json={
             "usuario": username,
@@ -33,7 +84,7 @@ class AccountMove(models.Model):
             if "token" in respuesta_json:
                 token = respuesta_json["token"]
                 _logger.info(token)
-                return token, url
+                return token, url, maximaNumeracion
             else:
                 _logger.error("La respuesta no contiene el token.")
             if respuesta_json.get("codigo") == 403:
