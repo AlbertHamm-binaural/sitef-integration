@@ -1,8 +1,8 @@
 from odoo import models, api, fields
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 import logging
 import requests
-from datetime import datetime as DateTime
+from datetime import datetime
 import base64
 import os
 
@@ -14,236 +14,188 @@ class AccountMove(models.Model):
     
     fecha_token_tfhka = fields.Datetime()
     token_actual_tfhka = fields.Char()
+    
+    def Emision(self):   
+        tipoDocumento = self.env.context.get('tipoDocumento')
+        url,token = self.GenerarToken()
+        hasta, inicio = self.ConsultaNumeracion(url, token)
+        numeroDocumento = self.UltimoDocumento(url, token)
 
+        if numeroDocumento is inicio:
+            self.AsignarNumeracion(self, url, token, hasta, inicio)
+        _logger.info(f"Se esta ejecturando emision")
+        
+        data = self.FacturaBasica(numeroDocumento, tipoDocumento)
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.post(url + "/Emision", json=data, headers=headers)
+        respuesta_json = response.json()
+        _logger.warning(respuesta_json)
+        codigo = respuesta_json.get("codigo")
+        mensaje = respuesta_json.get("mensaje")
+        validaciones = respuesta_json.get("validaciones")
+        if response.status_code is 200:
+            if codigo == "200":
+                _logger.info("Documento emitido correctamente")
+                raise UserError("Documento emitido correctamente")
+            else:
+                _logger.error(f"Error al emitir documento: {mensaje}")
+                raise UserError(f"Error al emitir documento: {mensaje}")
+        else:
+            _logger.error(f"Error {response.status_code}, {mensaje}")
+            raise UserError(f"Error {response.status_code}: {validaciones}")
 
-    def Nota(self, numeroDocumento):
-           
-        data = { 
-            "DocumentoElectronico": {
-                "Encabezado": {
-                    "IdentificacionDocumento": {
-                        "TipoDocumento": "02",
-                        "NumeroDocumento": numeroDocumento + 1,
-                        "TipoProveedor": "",
-                        "TipoTransaccion": "02",
-                        "SerieFacturaAfectada": "A",
-                        "NumeroFacturaAfectada": "10254",
-                        "FechaFacturaAfectada": "10/01/2023",
-                        "MontoFacturaAfectada": "10.00",
-                        "ComentarioFacturaAfectada": "prueba",
-                        "FechaEmision": "07/03/2023",
-                        "HoraEmision": "01:23:05 pm",
-                        "Anulado": False,
-                        "TipoDePago": "importado",
-                        "Serie": "A",
-                        "Sucursal": "0001",
-                        "TipoDeVenta": "interna",
-                        "Moneda": "VES"
-                    },
-                    "Vendedor": {
-                        "Codigo": "A01",
-                        "Nombre": "Moises Parra",
-                        "NumCajero": "001"
-                    },
-                    "Comprador": {
-                        "TipoIdentificacion": "V",
-                        "NumeroIdentificacion": "26159207",
-                        "RazonSocial": "Eduardo Montiel",
-                        "Direccion": "Av Principal de algun sitio",
-                        "Pais": "VE",
-                        "Telefono": [
-                            "+582122447664"
-                        ],
-                        "Correo": [
-                            "servidor@servidor.com"
-                        ]
-                    },
-                    "Totales": {
-                        "NroItems": "1",
-                        "MontoGravadoTotal": "10.00",
-                        "MontoExentoTotal": "0",
-                        "Subtotal": "10.00",
-                        "TotalAPagar": "11.60",
-                        "TotalIVA": "1.60",
-                        "MontoTotalConIVA": "11.60",
-                        "MontoEnLetras": "ONCE BOLIVARES CON SESENTA CENTIMOS",
-                        "TotalDescuento": "0",
-                        "ImpuestosSubtotal": [
-                            {
-                                "CodigoTotalImp": "G",
-                                "AlicuotaImp": "16.00",
-                                "BaseImponibleImp": "10.00",
-                                "ValorTotalImp": "1.60"
-                            }
-                        ],
-                        "FormasPago": [
-                            {
-                                "Forma": "01",
-                                "Monto": "11.60",
-                                "Moneda": "VES",
-                                "TipoCambio": ""
-                            }
-                        ]
-                    }
+    def FacturaBasica(self, numeroDocumento, tipoDocumento):
+        for record in self:
+            cliente = record.partner_id
+            hora = record.create_date.strftime("%I:%M:%S %p").lower()
+            telefono = cliente.mobile or cliente.phone
+            if cliente.vat != "":
+                if "-" in cliente.vat:
+                    if "." in cliente.vat:
+                        partes = cliente.vat.split("-")
+                        prefijo = partes[0]
+                        numeros = "-".join(partes[1:]).replace(".", "").replace("-", "")
+                    else:
+                        partes = cliente.vat.split("-")
+                        prefijo = partes[0]
+                        numeros = "-".join(partes[1:]).replace("-", "")
+                else:
+                    prefijo = cliente.vat[0]
+                    numeros = cliente.vat[1:]
+            fecha_emision = record.invoice_date.strftime("%d/%m/%Y") if record.invoice_date else ""
+            fecha_vencimiento = record.invoice_date_due.strftime("%d/%m/%Y") if record.invoice_date_due else ""
+            
+            identificacionDocumento = {
+                "tipoDocumento": tipoDocumento,
+                "numeroDocumento": str(numeroDocumento + 1),
+                "SerieFacturaAfectada": str(record.name),
+                "NumeroFacturaAfectada": str(record.id),
+                "FechaFacturaAfectada": fecha_emision,
+                "MontoFacturaAfectada": str(record.amount_total),
+                "ComentarioFacturaAfectada": "prueba",
+                "fechaEmision": fecha_emision,
+                "fechaVencimiento": fecha_vencimiento,
+                "horaEmision": hora,
+                "tipoDePago": record.invoice_payment_term_id.name or "",
+                "serie": "",
+                "tipoDeVenta": "*Interna",
+                "moneda": record.currency_id.name,
+            }
+            vendedor = {
+                "codigo": str(record.invoice_user_id.vat or record.invoice_user_id.id),
+                "nombre": record.invoice_user_id.name,
+            }
+            comprador = {
+                "tipoIdentificacion": prefijo,
+                "numeroIdentificacion": numeros,
+                "razonSocial": cliente.name,
+                "direccion": cliente.street or "no definida",
+                "pais": cliente.country_code or "",
+                "telefono": [telefono],
+                "notificar": "Si",
+                "correo": [cliente.email or ""],
+            }
+            totales = {
+                "nroItems": str(len(record.invoice_line_ids)),
+                "montoGravadoTotal": str(sum(line.price_subtotal for line in record.invoice_line_ids if line.tax_ids)),
+                "montoExentoTotal": str(round(sum(line.price_subtotal for line in record.invoice_line_ids if not line.tax_ids) * 100) / 100),
+                "subtotal": str(record.amount_untaxed),
+                "totalAPagar": str(record.amount_total),
+                "totalIVA": str(record.amount_tax), 
+                "montoTotalConIVA": str(record.amount_total),
+            }
+            detallesItems = []
+            contador = 1
+            for line in record.invoice_line_ids:
+                detallesItems.append({
+                    "numeroLinea": str(contador),
+                    "codigoPLU": line.product_id.barcode or line.product_id.default_code or "",
+                    "indicadorBienoServicio": "2" if line.product_id.type == 'service' else "1",
+                    "descripcion": line.product_id.name,
+                    "cantidad": str(line.quantity),
+                    "precioUnitario": str(line.price_unit),
+                    "precioItem": str(line.price_subtotal),
+                    "codigoImpuesto": "G",
+                    "tasaIVA": str(line.tax_ids[0].amount) if line.tax_ids else "0",
+                    "valorIVA": str(round(line.price_total - line.price_subtotal, 2)),
+                    "valorTotalItem": str(line.price_total),
+                })
+                contador += 1
+
+        data = {
+            "documentoElectronico": {
+                "encabezado": {
+                    "identificacionDocumento": identificacionDocumento,
+                    "vendedor": vendedor,
+                    "comprador": comprador,
+                    "totales": totales,
                 },
-                "DetallesItems": [
-                    {
-                        "NumeroLinea": "1",
-                        "CodigoPLU": "7591",
-                        "IndicadorBienoServicio": "1",
-                        "Descripcion": "Refresco PET 500 ml",
-                        "Cantidad": "2",
-                        "UnidadMedida": "NIU",
-                        "PrecioUnitario": "5.00",
-                        "PrecioItem": "10.00",
-                        "CodigoImpuesto": "G",
-                        "TasaIVA": "16.00",
-                        "ValorIVA": "1.60",
-                        "ValorTotalItem": "11.60"
-                    }
-                ]
+                "detallesItems": detallesItems,
             }
         }
         return data
     
-    def FacturaBasica(self, numeroDocumento):
-           
-        data = {
-                "documentoElectronico": {
-                "encabezado": {
-                "identificacionDocumento": {
-                    "tipoDocumento": "01",
-                    "numeroDocumento": str(numeroDocumento + 1),
-                    "tipoTransaccion": "01",
-                    "fechaEmision": "07/09/2023",
-                    "fechaVencimiento": "08/09/2023",
-                    "horaEmision": "01:36:22 pm",
-                    "tipoDePago": "CONTADO",
-                    "serie": "",
-                    "tipoDeVenta": "EN LINEA",
-                    "moneda": "BsD"
-                },
-                "comprador": {
-                    "tipoIdentificacion": "V",
-                    "numeroIdentificacion": "005534237",
-                    "razonSocial": "NELSON IVAN, LINARES OROPEZA",
-                    "direccion": "CRRT VIA LA UNION CALLE EL YAGRUMAL, QTA VILLA VIRGINIA, URB EL HATILLO, EL HATILLO-1083,CARACAS, EDO. DISTRITO CAPITAL, VENEZUELA",
-                    "pais": "VE",
-                    "telefono": [
-                    "+58-4142369327"
-                    ],
-                    "notificar": "Si",
-                    "correo": [
-                    "miguel@binauraldev.com"
-                    ]
-                }
-                },
-                "detallesItems":[
-                    {
-                    "numeroLinea": "1",
-                    "codigoPLU": "03-2023",
-                    "indicadorBienoServicio": "2",
-                    "descripcion": "CUOTA MANTENIMIENTO",
-                    "cantidad": "1",
-                    "precioUnitario": "1400",
-                    "precioItem": "1400",
-                    "codigoImpuesto": "G",
-                    "tasaIVA": "16",
-                    "valorIVA": "224",
-                    "valorTotalItem": "1624"
-                    }
-                ]
-            }
-        }
-        return data
-        
-
-    def Emision(self):   
-        url,token = self.GenerarToken() 
-        hasta, inicio = self.ConsultaNumeracion(url, token)
-        numeroDocumento = self.UltimoDocumento(url, token)
-        data = self.FacturaBasica(numeroDocumento)
-        
-        if numeroDocumento == inicio:
-            self.AsignarNumeracion(self, url, token, hasta, inicio)   
-        _logger.info(f"Se esta ejecturando emision")
-            
-        headers = {
-            "Authorization": f"Bearer {token}"
-        }      
-        response = requests.post(url + "/Emision", json=data,headers=headers)     
-        if response.status_code == 200:
-            respuesta_json = response.json()
-            if respuesta_json.get("codigo") == "200":
-                _logger.info("Documento emitido correctamente")
-            elif respuesta_json.get("codigo") == "201":
-                _logger.error("Numero de documento duplicado")
-                raise UserError("Numero de documento duplicado")
-            else:
-                _logger.error(f"Error al emitir documento: { respuesta_json}")
-                raise UserError(f"Error al emitir documento: { respuesta_json}")
-        else:
-            _logger.error(f"Error: {response.status_code}")
-            raise UserError(f"Error: {response.status_code}")
-        
-            
     def UltimoDocumento(self, url, token):
         _logger.info(f"Se esta ejecutando ultimodocumento")
 
         headers = {
             "Authorization": f"Bearer {token}"
         }
-          
+        
         response = requests.post(url + "/UltimoDocumento", json={
-                "token": token,
                 "serie": "",
                 "tipoDocumento": "01",
             }, headers=headers)
+        response_json = response.json()
+        _logger.warning(response_json)
+        codigo = response_json.get("codigo")
+        mensaje = response_json.get("mensaje")
         
         if response.status_code == 200:
-            _logger.info("Ultimo documento consultado correctamente")
-            respuesta_json = response.json()
-            if respuesta_json.get("codigo") == "200":
-                numeroDocumento = respuesta_json["numeroDocumento"]
+            if codigo == "200":
+                numeroDocumento = response_json["numeroDocumento"]
                 return numeroDocumento
             else:
-                _logger.error("Error al obtener numeroDocumento.")
+                _logger.error(f"Error {codigo}, {mensaje}")
+                raise UserError(f"Error {codigo}: {mensaje}")
         else:
-            _logger.error(f"Error: {response.status_code}")
-            raise UserError(f"Error: {response.status_code}")
+            _logger.error(f"Error {response.status_code}, {mensaje}")
+            raise UserError(f"Error {response.status_code}: {mensaje}")
 
     def AsignarNumeracion(self, url, token, hasta, inicio):
         fin = inicio + 20
         inicio += 1
         
         _logger.info(f"Se esta ejecutando asignar numeracion")
-        headers = {
-            "Authorization": f"Bearer {token}"
-        }
-        
         if inicio <= hasta:
+            headers = {
+                "Authorization": f"Bearer {token}"
+            }
             response = requests.post(url + "/AsignarNumeraciones", json={
-            "token": token,
-            "serie": "",
-            "tipoDocumento": "01",
-            "numeroDocumentoInicio": inicio,
-            "numeroDocumentoFin": fin
-        }, headers=headers)
+                "serie": "",
+                "tipoDocumento": "01",
+                "numeroDocumentoInicio": inicio,
+                "numeroDocumentoFin": fin
+            }, headers=headers)
+            response_json = response.json()
+            _logger.warning(response_json)
+            codigo = response_json.get("codigo")
+            mensaje = response_json.get("mensaje")
+            
             if response.status_code == 200:
-                _logger.info("Rango asignado correctamente")
-                return
-            elif response.status_code == 203:
-                _logger.warning(f"Error al asignar el rango: {response.status_code}")
-                raise UserError("Error al asignar el rango.")
+                if codigo == "200":
+                    _logger.info("Rango de numeración asignado correctamente.")
+                else:
+                    _logger.warning(f"Error {codigo}, {mensaje}")
+                    raise UserError(f"Error {codigo}: {mensaje}")
             else:
-                _logger.error(f"Error: {response.status_code}")
-                raise UserError(f"Error: {response.status_code}")
+                _logger.error(f"Error: {response.status_code}, {mensaje}")
+                raise UserError(f"Error: {response.status_code}: {mensaje}")
         else:
             _logger.error("El rango de numeración asignado ha sido superado.")
             raise UserError("El rango de numeración asignado ha sido superado.")
 
     def ConsultaNumeracion(self, url, token):
-        
         _logger.info(f"Se esta ejecutando consulta numeracion")
 
         headers = {
@@ -251,64 +203,64 @@ class AccountMove(models.Model):
         }
         
         response = requests.post(url + "/ConsultaNumeraciones", json={
-                "token": token,
                 "serie": "",
                 "tipoDocumento": "",
                 "prefix": ""
             }, headers=headers)
+        respuesta_json = response.json()
+        _logger.warning(respuesta_json)
+        codigo = respuesta_json.get("codigo")
+        mensaje = respuesta_json.get("mensaje")
         
         if response.status_code == 200:
-            _logger.info("Numeración consultada correctamente")
-            respuesta_json = response.json()
-            if respuesta_json.get("codigo") == "200" and "numeraciones" in respuesta_json:
+            if codigo == "200":
                 numeracion = respuesta_json["numeraciones"][0]
                 hasta = numeracion.get("hasta")
                 inicio = numeracion.get("correlativo")
                 return hasta, inicio
             else:
-                _logger.error("No existen numeraciones que coincidan con los criterios aplicados o que cuenten con disponibilidad.")
-                raise UserError("Error al obtener numeraciones.")
+                _logger.error(f"Error {codigo}, {mensaje}")
+                raise UserError(f"Error {codigo}: {mensaje}")
         else:
-            _logger.error(f"Error: {response.status_code}")
-            raise UserError(f"Error: {response.status_code}")
+            _logger.error(f"Error: {response.status_code}, {mensaje}")
+            raise UserError(f"Error: {response.status_code}: {mensaje}")
 
-    
     # def DescargarArchivo(self):
     #     url, token = self.GenerarToken()
-        
+    
     #     headers = {
     #         "Authorization": f"Bearer {token}"
     #     }
-        
+    
     #     response = requests.post(url + "/DescargaArchivo", json={
     #             "token": token,
     #             "serie": "",
     #             "tipoDocumento": "01",
     #             "numeroDocumento": "1"
     #         }, headers=headers)
-        
+    
     #     if response.status_code == 200:
     #         _logger.info("Petición realizada correctamente")
-            
+    
     #         try:
     #             respuesta_json = response.json()
-                
+    
     #             if respuesta_json.get("codigo") == "200":
     #                 base64_string = respuesta_json.get("archivo")
-                    
+    
     #                 if base64_string:
     #                     try:
     #                         # Decodificar el archivo
     #                         decoded_file = base64.b64decode(base64_string)
-                            
+    
     #                         # Ruta explícita
     #                         current_directory = ""
     #                         file_path = os.path.join(current_directory, "archivo_descargado.pdf")
-                            
+    
     #                         # Guardar el archivo
     #                         with open(file_path, "wb") as file:
     #                             file.write(decoded_file)
-                            
+    
     #                         _logger.info(f"Archivo guardado en: {file_path}")
     #                         return file_path
     #                     except Exception as e:
@@ -326,46 +278,48 @@ class AccountMove(models.Model):
     #     else:
     #         _logger.error(f"Error HTTP: {response.status_code}")
     #         raise UserError(f"Error HTTP: {response.status_code}")
-
+    
     def GenerarToken(self):           
         username, password, url = self.ObtenerCredencial()
         fecha_token_tfhka = self.fecha_token_tfhka 
-        fecha_actual = DateTime.now()
+        fecha_actual = datetime.now()    
         
-        if not isinstance(fecha_token_tfhka, DateTime) or fecha_token_tfhka < fecha_actual:
+        if not isinstance(fecha_token_tfhka, datetime) or fecha_token_tfhka < fecha_actual:
             respuesta = requests.post(url + "/Autenticacion", json={
                 "usuario": username,
                 "clave": password
             })
             respuesta_json = respuesta.json()
             _logger.warning(respuesta_json)
-              
+            codigo = respuesta_json.get("codigo")
+            mensaje = respuesta_json.get("mensaje")
+            
             if respuesta.status_code == 200:
-                if "token" in respuesta_json:
+                if codigo == 200 and "token" in respuesta_json:
                     token = respuesta_json["token"]
-                    _logger.info(f"El token es: {token}")
+                    _logger.info(mensaje)
                     
                     expiracion_str = respuesta_json["expiracion"]
                     expiracion_str = expiracion_str[:26] + 'Z' 
-                    expiracion = DateTime.strptime(expiracion_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+                    expiracion = datetime.strptime(expiracion_str, "%Y-%m-%dT%H:%M:%S.%fZ")
                     
                     self.fecha_token_tfhka = expiracion
                     self.token_actual_tfhka = token
                     return url, token
-                elif "token" not in respuesta_json:
-                    mensaje = respuesta_json.get("mensaje")
+                elif codigo == 403:
                     _logger.warning(mensaje)
-                    raise UserError(F"Error {mensaje}")
+                    raise ValidationError(f"Configuración del Módulo incorrecta: {mensaje}")
                 else:
-                    _logger.error(f"Error: {respuesta.status_code}")
+                    _logger.error(f"Error: {codigo}, {mensaje}")
+                    raise UserError(f"Error: {codigo} \n{mensaje}")
             else: 
-                _logger.error(f"Error: {respuesta.status_code}")
-                raise UserError(f"Error: {respuesta.status_code}")
+                _logger.error(f"Error: {respuesta.status_code}", {mensaje})
+                raise UserError(f"Error {respuesta.status_code}: {mensaje}")
         else:
             _logger.info("El token aún es válido.")
             token = self.token_actual_tfhka
             return url, token
-        
+
     def ObtenerCredencial(self):
         
         username = None
@@ -380,6 +334,5 @@ class AccountMove(models.Model):
             
                 return username, password, url
             else:
-                _logger.error("USERNAME o PASSWORD vacío.")
-                raise UserError("USERNAME o PASSWORD vacío.")
-            
+                _logger.error("USERNAME, PASSWORD o URL vacío.")
+                raise ValidationError("Configuración del Módulo incorrecta: USERNAME, PASSWORD o URL vacío.")
