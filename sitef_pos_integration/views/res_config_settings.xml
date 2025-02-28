@@ -60,7 +60,7 @@
                                 Validar el pago de un cliente por Transferencia
                             </div>
                         </div>
-                        <div class="o_setting_left_pane">
+                        <!-- <div class="o_setting_left_pane">
                             <field name="activated_zelle_sitef"/>
                         </div>
                         <div class="o_setting_right_pane">
@@ -68,7 +68,7 @@
                             <div class="text-muted">
                                 Validar el pago de un cliente por Zelle
                             </div>
-                        </div>
+                        </div> -->
                         <h3><b><u>Metodos de Cambio</u></b></h3>
                         <div class="form-group">
                             <div class="o_setting_left_pane">

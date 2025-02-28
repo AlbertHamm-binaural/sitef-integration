@@ -241,49 +241,7 @@ class SitefController(http.Controller):
         else:
             _logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
             return {"error": f"Error en la solicitud: {response.status_code}"}
-        
-    @http.route('/sitef_pos_integration/validarZelle_sitef', type='json', methods=['POST'])
-    def validarZelle_sitef(self, url, username, token, idbranch, codestall, amount, trxdate, sequentialnumber, phonenumber, authorizationcode):
-        _logger.warning("INSIDE VALIDAR TRANSFERENCIA SITEF")
-        headers = {
-            "Authorization": f"Bearer {token}"
-        }
-        token_md5 = hashlib.md5(token.encode()).hexdigest()
-        response = requests.post(url + "/sitefAuth/getZelleSitef", json={
-            "username": username,
-            "token": token_md5,
-            "idbranch": idbranch,
-            "codestall": codestall,
-            "amount": amount,
-            "sequentialnumber": sequentialnumber,
-            "phonenumber": phonenumber,
-            "authorizationcode": authorizationcode,
-            "trxdate": trxdate
-        }, headers=headers)
-        
-        if response.status_code == 200:
-            response_json = response.json()
-            _logger.warning(response_json)
-            
-            if "data" in response_json and "marcada" in response_json["data"]:
-                return response_json["data"]["marcada"]
-            else:
-                _logger.error("Error en la solicitud.")
-                error_list = response_json["data"]["error_list"]
-                if isinstance(error_list, list) and len(error_list) > 0:
-                    return {
-                        "error_code": "Datos no encontrados",
-                        "description": error_list[0]["description"]
-                    }
-                else:
-                    return {
-                        "error_code": "unknown",
-                        "description": "Unknown error"
-                    }
-        else:
-            _logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
-            return {"error": f"Error en la solicitud: {response.status_code}"}
-
+    
     @http.route('/sitef_pos_integration/reporteCaja_sitef', type='json', methods=['POST'])
     def reporteCaja_sitef(self, url, username, token, idbranch, codestall, trxdateini, trxdateend, typereport, adquiriente):
         _logger.warning("INSIDE REPORTE POR CAJA SITEF")
@@ -326,20 +284,63 @@ class SitefController(http.Controller):
             _logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
             return {"error": f"Error en la solicitud: {response.status_code}"}
 
-    @http.route('/sitef_pos_integration/obtener_precio_dolar', type='json', methods=['POST'])
-    def obtener_precio_dolar(self):
-        url = 'https://www.bcv.org.ve'
-        respuesta = requests.get(url, verify=False)
 
-        if respuesta.status_code == 200:
-            soup = BeautifulSoup(respuesta.text, 'html.parser')
+    # @http.route('/sitef_pos_integration/validarZelle_sitef', type='json', methods=['POST'])
+    # def validarZelle_sitef(self, url, username, token, idbranch, codestall, amount, trxdate, sequentialnumber, phonenumber, authorizationcode):
+    #     _logger.warning("INSIDE VALIDAR TRANSFERENCIA SITEF")
+    #     headers = {
+    #         "Authorization": f"Bearer {token}"
+    #     }
+    #     token_md5 = hashlib.md5(token.encode()).hexdigest()
+    #     response = requests.post(url + "/sitefAuth/getZelleSitef", json={
+    #         "username": username,
+    #         "token": token_md5,
+    #         "idbranch": idbranch,
+    #         "codestall": codestall,
+    #         "amount": amount,
+    #         "sequentialnumber": sequentialnumber,
+    #         "phonenumber": phonenumber,
+    #         "authorizationcode": authorizationcode,
+    #         "trxdate": trxdate
+    #     }, headers=headers)
+        
+    #     if response.status_code == 200:
+    #         response_json = response.json()
+    #         _logger.warning(response_json)
             
-            dolar_divs = soup.find_all('div', class_='centrado')
+    #         if "data" in response_json and "marcada" in response_json["data"]:
+    #             return response_json["data"]["marcada"]
+    #         else:
+    #             _logger.error("Error en la solicitud.")
+    #             error_list = response_json["data"]["error_list"]
+    #             if isinstance(error_list, list) and len(error_list) > 0:
+    #                 return {
+    #                     "error_code": "Datos no encontrados",
+    #                     "description": error_list[0]["description"]
+    #                 }
+    #             else:
+    #                 return {
+    #                     "error_code": "unknown",
+    #                     "description": "Unknown error"
+    #                 }
+    #     else:
+    #         _logger.error(f"Error en la solicitud: {response.status_code} - {response.text}")
+    #         return {"error": f"Error en la solicitud: {response.status_code}"}
+
+    # @http.route('/sitef_pos_integration/obtener_precio_dolar', type='json', methods=['POST'])
+    # def obtener_precio_dolar(self):
+    #     url = 'https://www.bcv.org.ve'
+    #     respuesta = requests.get(url, verify=False)
+
+    #     if respuesta.status_code == 200:
+    #         soup = BeautifulSoup(respuesta.text, 'html.parser')
             
-            if len(dolar_divs) >= 5:
-                dolar_text = dolar_divs[4].find('strong').text.strip()
-                dolar_text = dolar_text.replace(',', '.')
-                precio_dolar = float(dolar_text.split(' ')[0])
-                return round(precio_dolar, 2)
-        else:
-            print(f"Error: {respuesta.status_code}")
+    #         dolar_divs = soup.find_all('div', class_='centrado')
+            
+    #         if len(dolar_divs) >= 5:
+    #             dolar_text = dolar_divs[4].find('strong').text.strip()
+    #             dolar_text = dolar_text.replace(',', '.')
+    #             precio_dolar = float(dolar_text.split(' ')[0])
+    #             return round(precio_dolar, 2)
+    #     else:
+    #         print(f"Error: {respuesta.status_code}")

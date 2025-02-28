@@ -22,8 +22,16 @@
     
     "assets": {
         "point_of_sale.assets": [
-            "sitef_pos_integration/static/src/js/*.js",
-            "sitef_pos_integration/static/src/xml/*.xml",
+            "sitef_pos_integration/static/src/js/payment_control.js",
+            "sitef_pos_integration/static/src/js/CambioForm.js",
+            "sitef_pos_integration/static/src/js/ValidarPagoMovilForm.js",
+            "sitef_pos_integration/static/src/js/ValidarTransferenciaForm.js",
+
+            "sitef_pos_integration/static/src/xml/payment_control.xml",
+            "sitef_pos_integration/static/src/xml/CambioForm.xml",
+            "sitef_pos_integration/static/src/xml/ValidarPagoMovilForm.xml",
+            "sitef_pos_integration/static/src/xml/ValidarTransferenciaForm.xml",
+
             "sitef_pos_integration/static/src/css/*.css",
         ],
     },

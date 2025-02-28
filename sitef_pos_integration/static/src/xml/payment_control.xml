@@ -14,10 +14,10 @@
                 <i class="fa fa-exchange"/>
                 Transferencia
             </div>
-            <div t-if="env.pos.config.activated_zelle_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPago(selectedPaymentLine.amount) }" t-on-click="validarZelle">
+            <!-- <div t-if="env.pos.config.activated_zelle_sitef" class="button js_invoice" t-att-class="{ 'opaque': !selectedPaymentLine || AmountPago(selectedPaymentLine.amount) }" t-on-click="validarZelle">
                 <i class="fa fa-university"/>
                 Zelle
-            </div>
+            </div> -->
         </xpath>
     </t>
 </templates>

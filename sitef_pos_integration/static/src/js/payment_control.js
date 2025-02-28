@@ -17,7 +17,7 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
                 if (this.selectedPaymentLine.transaction_id) {
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Operación Fallida'),
-                        body: this.env._t('No se puede aplicar el cambio porque ya se realizó anteriormente en esta línea.'),
+                        body: this.env._t('No se puede hacer el cambio porque ya se realizó una transacción en esta línea.'),
                     });
                     return;
                 } else {
@@ -42,7 +42,7 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
                 if (this.selectedPaymentLine.transaction_id) {
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Operación Fallida'),
-                        body: this.env._t('No se puede aplicar el cambio porque ya se realizó anteriormente en esta línea.'),
+                        body: this.env._t('No se puede validar un pago móvil porque ya se realizó una transacción en esta línea.'),
                     });
                     return;
                 } else {
@@ -50,7 +50,6 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
                     if (confirmed) {
                         console.log(payment_reference)
                         this.selectedPaymentLine.transaction_id = payment_reference;
-                        // this.selectedPaymentLine.ticket = "Cambio";
                     } else {
                         console.log('No se obtuvo referencia de pago');
                     }
@@ -65,7 +64,15 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
         }
         async validarTransferencia() {
             if (this.selectedPaymentLine && this.selectedPaymentLine.amount > 0) {
-                this.showPopup('ValidarTransferenciaForm', {amount: Math.abs(this.selectedPaymentLine.amount)});
+                if (this.selectedPaymentLine.transaction_id) {
+                    this.showPopup('ErrorPopup', {
+                        title: this.env._t('Operación Fallida'),
+                        body: this.env._t('No se puede validar una transferencia porque ya se realizó una transacción en esta línea.'),
+                    });
+                    return;
+                } else {
+                    this.showPopup('ValidarTransferenciaForm', {amount: Math.abs(this.selectedPaymentLine.amount)});
+                }
             }
             else {
                 this.showPopup('ErrorPopup', {
@@ -75,17 +82,17 @@ odoo.define('sitef_pos_integration.payment_control', function (require) {
             }
         }   
         
-        async validarZelle() {
-            if (this.selectedPaymentLine && this.selectedPaymentLine.amount > 0) {
-                this.showPopup('ValidarZelleForm', { amount: Math.abs(this.selectedPaymentLine.amount) });
-            }
-            else {
-                this.showPopup('ErrorPopup', {
-                    title: this.env._t('Error'),
-                    body: this.env._t('No se puede realizar un Zelle.'),
-                });
-            }
-        }    
+        // async validarZelle() {
+        //     if (this.selectedPaymentLine && this.selectedPaymentLine.amount > 0) {
+        //         this.showPopup('ValidarZelleForm', { amount: Math.abs(this.selectedPaymentLine.amount) });
+        //     }
+        //     else {
+        //         this.showPopup('ErrorPopup', {
+        //             title: this.env._t('Error'),
+        //             body: this.env._t('No se puede realizar un Zelle.'),
+        //         });
+        //     }
+        // }    
         AmountCambio(amount) {
             const metodo_pago = this.selectedPaymentLine.name;
             if (amount < 0 && metodo_pago == 'Banco') {
